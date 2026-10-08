@@ -20,7 +20,7 @@ def _load_regions(filename='region.json'):
 
 ALL_RESOURCES = [
     "UHost", "UDisk", "NATGW", "UNI", "ALB", "NLB",
-    "EIP", "UGN", "UWAN", "SecurityGroup", "ACL", "Subnet", "VPC",
+    "EIP", "UGN", "UWAN", "IPSecVPN", "SecurityGroup", "ACL", "Subnet", "VPC",
 ]
 
 _CANVAS_HEIGHT = 320

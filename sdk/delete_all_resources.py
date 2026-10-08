@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 聚合资源删除脚本
-按顺序删除: uhost -> udisk -> natgw -> uni -> alb -> nlb -> eip -> ugn -> uwan -> secgroup -> acl -> subnet -> vpc
+按顺序删除: uhost -> udisk -> natgw -> uni -> alb -> nlb -> eip -> ugn -> uwan -> ipsecvpn -> secgroup -> acl -> subnet -> vpc
 删除失败时跳过并记录日志
 """
 
@@ -441,6 +441,69 @@ def delete_uwans(client, loc_name, region, zone, project_id, stop_event=None):
         logger.error(f"[{loc_name}] 获取POPGW列表失败: {e}")
 
 
+def delete_ipsecvpns(client, loc_name, region, zone, project_id, stop_event=None):
+    """删除 IPSecVPN 资源 - 隧道、VPN网关和客户VPN网关"""
+    # 第一步：删除 VPN 隧道（隧道依附于 VPN 网关，须先删除）
+    try:
+        resp = client.ipsecvpn().describe_vpn_tunnel()
+        tunnels = [t['VPNTunnelId'] for t in (resp.get('DataSet') or []) if 'VPNTunnelId' in t]
+
+        if tunnels:
+            logger.info(f"[{loc_name}] 项目: {project_id} 找到 {len(tunnels)} 条 VPN 隧道: {tunnels}")
+            for tunnelid in tunnels:
+                if _stopped(stop_event):
+                    return
+                try:
+                    logger.info(f"[{loc_name}] 项目: {project_id} 正在删除 VPN 隧道: {tunnelid}...")
+                    client.ipsecvpn().delete_vpn_tunnel({'VPNTunnelId': tunnelid})
+                    time.sleep(1)
+                    logger.info(f"[{loc_name}] 项目: {project_id} 删除 VPN 隧道: {tunnelid} 成功")
+                except Exception as e:
+                    logger.error(f"[{loc_name}] 删除VPN隧道 {tunnelid} 失败: {e}")
+    except Exception as e:
+        logger.error(f"[{loc_name}] 获取VPN隧道列表失败: {e}")
+
+    # 第二步：删除 VPN 网关（顺带解绑并释放绑定的 EIP）
+    try:
+        resp = client.ipsecvpn().describe_vpn_gateway()
+        gateways = [g['VPNGatewayId'] for g in (resp.get('DataSet') or []) if 'VPNGatewayId' in g]
+
+        if gateways:
+            logger.info(f"[{loc_name}] 项目: {project_id} 找到 {len(gateways)} 个 VPN 网关: {gateways}")
+            for gwid in gateways:
+                if _stopped(stop_event):
+                    return
+                try:
+                    logger.info(f"[{loc_name}] 项目: {project_id} 正在删除 VPN 网关: {gwid}...")
+                    client.ipsecvpn().delete_vpn_gateway({'VPNGatewayId': gwid, 'ReleaseEip': True})
+                    time.sleep(1)
+                    logger.info(f"[{loc_name}] 项目: {project_id} 删除 VPN 网关: {gwid} 成功")
+                except Exception as e:
+                    logger.error(f"[{loc_name}] 删除VPN网关 {gwid} 失败: {e}")
+    except Exception as e:
+        logger.error(f"[{loc_name}] 获取VPN网关列表失败: {e}")
+
+    # 第三步：删除客户 VPN 网关
+    try:
+        resp = client.ipsecvpn().describe_remote_vpn_gateway()
+        remote_gateways = [g['RemoteVPNGatewayId'] for g in (resp.get('DataSet') or []) if 'RemoteVPNGatewayId' in g]
+
+        if remote_gateways:
+            logger.info(f"[{loc_name}] 项目: {project_id} 找到 {len(remote_gateways)} 个客户 VPN 网关: {remote_gateways}")
+            for rgwid in remote_gateways:
+                if _stopped(stop_event):
+                    return
+                try:
+                    logger.info(f"[{loc_name}] 项目: {project_id} 正在删除客户 VPN 网关: {rgwid}...")
+                    client.ipsecvpn().delete_remote_vpn_gateway({'RemoteVPNGatewayId': rgwid})
+                    time.sleep(1)
+                    logger.info(f"[{loc_name}] 项目: {project_id} 删除客户 VPN 网关: {rgwid} 成功")
+                except Exception as e:
+                    logger.error(f"[{loc_name}] 删除客户VPN网关 {rgwid} 失败: {e}")
+    except Exception as e:
+        logger.error(f"[{loc_name}] 获取客户VPN网关列表失败: {e}")
+
+
 def delete_secgroups(client, loc_name, region, zone, project_id, stop_event=None):
     """删除安全组"""
     try:
@@ -592,6 +655,7 @@ DELETE_OPERATIONS = [
     ("EIP", delete_eips),
     ("UGN", delete_ugns),
     ("UWAN", delete_uwans),
+    ("IPSecVPN", delete_ipsecvpns),
     ("SecurityGroup", delete_secgroups),
     ("ACL", delete_acls),
     ("Subnet", delete_subnets),
