@@ -72,7 +72,7 @@ class UCloudCleanerApp:
         self.tray = pystray.Icon(
             "UCloudCleaner",
             _create_icon(),
-            "UCloud Cleaner Web",
+            "UCloud Cleaner",
             menu=pystray.Menu(
                 pystray.MenuItem("打开UCloud Cleaner", self._on_open_browser),
                 pystray.MenuItem("停止服务并退出", self._on_exit),
