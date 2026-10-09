@@ -16,7 +16,7 @@ python3 -m web.app
 
 **Build macOS .app of the Web version (Apple Silicon only):**
 ```bash
-./build_web.sh
+./build.sh
 # Output: dist/UCloudCleanerWeb.app
 ```
 
@@ -48,7 +48,7 @@ Scheduling loop shared by the Web worker:
 Entry point: `web/app.py` → `create_app()`.
 
 **Routes:**
-- `GET /api/regions?env=prod|test` — loads `assets/region.json` or `region_test.json`
+- `GET /api/regions?env=prod|test` — loads `region/region.json` or `region_test.json`
 - `GET /api/resources` — returns `[name for name, _ in DELETE_OPERATIONS]`
 - `POST /api/projects` — calls `fetch_project_list()`, returns ordered list
 - `POST /api/tasks` — validates payload, creates `Task`, submits to `TaskManager`
@@ -71,16 +71,16 @@ Entry point: `web/app.py` → `create_app()`.
 - Collapsible log panel, auto-scroll toggle, clear button
 - Select-all / select-none buttons for projects, regions, and resources
 
-### `assets/`
+### `region/`
 - `region.json` — production regions
 - `region_test.json` — test regions
 
 Format: `{"区域名": {"Region": "cn-bj2", "Zone": "cn-bj2-02"}}`
 
-Web (`web/task_manager.py`) reads from these files. The CLI (`sdk/delete_all_resources.py`) also reads from `../assets/region.json`.
+Web (`web/task_manager.py`) reads from these files. The CLI (`sdk/delete_all_resources.py`) also reads from `../region/region.json`.
 
 ### PyInstaller packaging
-`UCloudCleanerWeb.spec` bundles `assets/*.json`, `sdk/*.py`, `web/`, `web_launcher.py`. Target: Apple Silicon Mac, macOS 11.0+.
+`UCloudCleaner.spec` bundles `region/*.json`, `sdk/*.py`, `web/`, `web_launcher.py`. Target: Apple Silicon Mac, macOS 11.0+. Build: `./build.sh` → `dist/UCloudCleaner.app`.
 
 ### Config files
 - `web/config.json` — optional; keys: `host` (default `"127.0.0.1"`), `port` (default `8080`)

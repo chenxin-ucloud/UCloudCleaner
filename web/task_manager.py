@@ -16,15 +16,15 @@ from web.log_handler import BufferHandler
 _SDK_LOGGER_NAME = "sdk.delete_all_resources"
 
 
-_ASSETS_DIR = os.path.join(
+_REGION_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "assets",
+    "region",
 )
 
 
 def _load_regions_for_env(env_name: str) -> dict:
     filename = "region_test.json" if env_name == "测试环境" else "region.json"
-    with open(os.path.join(_ASSETS_DIR, filename), "r", encoding="utf-8") as f:
+    with open(os.path.join(_REGION_DIR, filename), "r", encoding="utf-8") as f:
         return json.load(f)
 
 

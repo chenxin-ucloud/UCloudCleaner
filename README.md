@@ -96,8 +96,8 @@ A：先确认任务状态为「running」；若仍无日志，按 F12 打开浏�
 
 编辑以下 JSON 文件可增加/删除区域：
 
-- `assets/region.json` — 正式环境区域
-- `assets/region_test.json` — 测试环境区域
+- `region/region.json` — 正式环境区域
+- `region/region_test.json` — 测试环境区域
 
 格式：
 ```json

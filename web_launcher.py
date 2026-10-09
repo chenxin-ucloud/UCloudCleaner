@@ -70,7 +70,7 @@ class UCloudCleanerApp:
 
         # 创建托盘
         self.tray = pystray.Icon(
-            "UCloudCleanerWeb",
+            "UCloudCleaner",
             _create_icon(),
             "UCloud Cleaner Web",
             menu=pystray.Menu(

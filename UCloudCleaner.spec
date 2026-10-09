@@ -9,8 +9,8 @@ a = Analysis(
     binaries=[],
     datas=[
         ('UCloud_Cleaner.png', '.'),
-        ('assets/region.json', 'assets'),
-        ('assets/region_test.json', 'assets'),
+        ('region/region.json', 'region'),
+        ('region/region_test.json', 'region'),
         ('sdk/delete_all_resources.py', 'sdk'),
         ('sdk/runner_core.py', 'sdk'),
         ('web/static', 'web/static'),
@@ -56,7 +56,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='UCloudCleanerWeb',
+    name='UCloudCleaner',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -72,12 +72,12 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='UCloudCleanerWeb',
+    name='UCloudCleaner',
 )
 
 app = BUNDLE(
     coll,
-    name='UCloudCleanerWeb.app',
+    name='UCloudCleaner.app',
     icon='UCloud_Cleaner.png',
     bundle_identifier='com.ucloud.cleaner.web',
     info_plist={

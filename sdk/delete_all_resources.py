@@ -669,9 +669,9 @@ def main():
 
     projects_config = _load_projects_config()
 
-    # 加载区域配置（统一从项目根目录 assets/ 读取）
+    # 加载区域配置（统一从项目根目录 region/ 读取）
     sdk_dir = os.path.dirname(os.path.abspath(__file__))
-    region_file = os.path.join(sdk_dir, "..", "assets", "region.json")
+    region_file = os.path.join(sdk_dir, "..", "region", "region.json")
     with open(region_file, "r", encoding="utf-8") as f:
         regions = json.load(f)
 
