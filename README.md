@@ -2,14 +2,9 @@
 
 批量清理 UCloud 项目资源的工具。
 
-> **⚠️ 重要提示：macOS GUI（桌面 App）版本已停止迭代，推荐使用 Web 版本。**  
-> Web 版无需打包、无需安装，浏览器打开即用，支持 macOS / Windows / Linux 跨平台。
+Web 版基于 Flask，前端纯 HTML/CSS/JS，浏览器打开即用，支持 macOS / Windows / Linux 跨平台，所有计算在本地完成，数据不上传第三方服务器。
 
----
-
-## 一、Web 版（强烈推荐）
-
-Web 版后端基于 Flask，前端纯 HTML/CSS/JS，所有计算在本地完成，数据不上传第三方服务器。
+## 一、使用说明
 
 ### 1. 环境准备
 
@@ -97,44 +92,12 @@ A：先确认任务状态为「running」；若仍无日志，按 F12 打开浏�
 
 ---
 
-## 二、macOS GUI 版（已停止迭代）
-
-> **注意**：以下内容为旧版桌面 App 说明，不再新增功能，仅作存档。新项目请直接使用上方的 Web 版。
-
-### 环境要求
-
-- macOS 11.0+，Apple Silicon（M 系列）
-- Python 3.x
-
-### 开发模式运行
-
-```bash
-pip3 install ucloud-sdk-python3
-cd gui
-python3 main.py
-```
-
-### 打包为 .app
-
-```bash
-./build.sh
-open dist/UCloudCleaner.app
-```
-
-### 使用方法
-
-1. **配置** 标签页：填写 API 公钥、私钥、项目 ID（多个用逗号分隔），选择环境
-2. **资源选择** 标签页：勾选要清理的区域和资源类型
-3. **清理日志** 标签页：点击「开始清理」，实时查看进度；点击「停止」可中断
-
----
-
-## 三、维护区域列表
+## 二、维护区域列表
 
 编辑以下 JSON 文件可增加/删除区域：
 
-- `gui/assets/region.json` — 正式环境区域
-- `gui/assets/region_test.json` — 测试环境区域
+- `assets/region.json` — 正式环境区域
+- `assets/region_test.json` — 测试环境区域
 
 格式：
 ```json
@@ -143,11 +106,11 @@ open dist/UCloudCleaner.app
 }
 ```
 
-修改后 Web 版即时生效；GUI 打包版需重新执行 `./build.sh`。
+修改后 Web 版即时生效。
 
 ---
 
-## 四、开发测试
+## 三、开发测试
 
 ```bash
 pip3 install -r requirements-dev.txt

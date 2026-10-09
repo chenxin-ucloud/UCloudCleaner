@@ -4,25 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-**Web version is the actively maintained entry point.** The macOS GUI (tkinter) is archived and no longer receives new features.
+**Web version is the only maintained entry point** (Flask + native HTML/CSS/JS). The legacy tkinter GUI and its macOS .app packaging have been removed.
 
 ## Commands
 
-**Run Web version (primary):**
+**Run Web version:**
 ```bash
 python3 -m web.app
 # Open browser at http://127.0.0.1:8080
 ```
 
-**Run GUI (legacy, macOS only):**
+**Build macOS .app of the Web version (Apple Silicon only):**
 ```bash
-cd gui && python3 main.py
-```
-
-**Build macOS .app (legacy, Apple Silicon only):**
-```bash
-./build.sh
-# Output: dist/UCloudCleaner.app
+./build_web.sh
+# Output: dist/UCloudCleanerWeb.app
 ```
 
 **Run tests:**
@@ -34,18 +29,18 @@ No linter is configured.
 
 ## Architecture
 
-The project has three layers: a shared deletion engine, a legacy tkinter GUI, and a Flask-based Web UI.
+The project has two layers: a shared deletion engine and a Flask-based Web UI.
 
 ### `sdk/delete_all_resources.py`
 The core deletion engine. Key points:
 - `get_client(region, project_id, public_key, private_key, base_url=None)` — constructs the UCloud `Client`; `base_url` is only set for the test environment (`http://api-test03.ucloudadmin.com`)
 - `fetch_project_list(public_key, private_key, base_url=None)` — returns project list sorted by `CreateTime` ascending; format `[{"project_id": "...", "name": "...", "create_time": 123}, ...]`
-- `DELETE_OPERATIONS` — module-level list of `(resource_name, delete_func)` tuples; both GUI and Web filter this list based on user selection
-- `logger` has **no handlers at module level** — Web attaches `BufferHandler`; GUI attaches `QueueHandler`; CLI callers call `setup_file_logging()`
+- `DELETE_OPERATIONS` — module-level list of `(resource_name, delete_func)` tuples; Web filters this list based on user selection
+- `logger` has **no handlers at module level** — Web attaches `BufferHandler`; CLI callers call `setup_file_logging()`
 - Deletion order matters: UHost → UDisk (15-second wait after UHost to let disks detach) → NATGW → ... → VPC
 
 ### `sdk/runner_core.py`
-Shared scheduling loop extracted for use by both GUI and Web:
+Scheduling loop shared by the Web worker:
 - `run_deletion_core(..., log_sink, stop_event)` — duck-typed `log_sink` (any object with `put(dict)`)
 - `resolve_api_url(env_name, explicit)` — auto-maps "测试环境" + empty URL to `http://api-test03.ucloudadmin.com`
 
@@ -53,7 +48,7 @@ Shared scheduling loop extracted for use by both GUI and Web:
 Entry point: `web/app.py` → `create_app()`.
 
 **Routes:**
-- `GET /api/regions?env=prod|test` — loads `gui/assets/region.json` or `region_test.json`
+- `GET /api/regions?env=prod|test` — loads `assets/region.json` or `region_test.json`
 - `GET /api/resources` — returns `[name for name, _ in DELETE_OPERATIONS]`
 - `POST /api/projects` — calls `fetch_project_list()`, returns ordered list
 - `POST /api/tasks` — validates payload, creates `Task`, submits to `TaskManager`
@@ -76,28 +71,16 @@ Entry point: `web/app.py` → `create_app()`.
 - Collapsible log panel, auto-scroll toggle, clear button
 - Select-all / select-none buttons for projects, regions, and resources
 
-### `gui/` — tkinter GUI (archived)
-Entry point: `gui/main.py` → `gui/app.py` (`App(tk.Tk)`).
-
-**State flow:** `AppState` (dataclass in `core/state.py`) is the single source of truth. Tabs read from it on startup and write back via `get_values()` before running.
-
-**Tab structure:**
-- `ConfigTab` — API environment dropdown, public key, private key, project IDs
-- `ResourceTab` — Region checkboxes + resource type checkboxes
-- `LogTab` — `run_deletion()` in daemon thread, `queue.Queue` + `tk.after()` polling
-
-**Runner:** `gui/core/runner.py` — thin shell resolving SDK/assets paths, attaching `QueueHandler`, delegating to `run_deletion_core`.
-
-### `gui/assets/`
+### `assets/`
 - `region.json` — production regions
 - `region_test.json` — test regions
 
 Format: `{"区域名": {"Region": "cn-bj2", "Zone": "cn-bj2-02"}}`
 
-Both Web and GUI read from these files. The CLI (`sdk/delete_all_resources.py`) also reads from `../gui/assets/region.json`.
+Web (`web/task_manager.py`) reads from these files. The CLI (`sdk/delete_all_resources.py`) also reads from `../assets/region.json`.
 
-### PyInstaller packaging (legacy)
-`UCloudCleaner.spec` bundles `gui/assets/*.json`, `sdk/*.py`. Target: Apple Silicon Mac, macOS 11.0+.
+### PyInstaller packaging
+`UCloudCleanerWeb.spec` bundles `assets/*.json`, `sdk/*.py`, `web/`, `web_launcher.py`. Target: Apple Silicon Mac, macOS 11.0+.
 
 ### Config files
 - `web/config.json` — optional; keys: `host` (default `"127.0.0.1"`), `port` (default `8080`)
