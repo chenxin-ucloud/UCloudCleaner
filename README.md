@@ -11,7 +11,7 @@ Web 版基于 Flask，前端纯 HTML/CSS/JS，浏览器打开即用，支持 mac
 1. 确保电脑已安装 Python 3（macOS 自带，终端输入 `python3 --version` 有输出即可）
 2. 打开终端，进入项目文件夹：
    ```bash
-   cd /Users/user/Desktop/chenxin/DelScripts
+   cd UCloudCleaner
    ```
 3. 安装依赖（首次使用只需执行一次）：
    ```bash
@@ -27,7 +27,7 @@ python3 -m web.app
 
 看到如下输出即启动成功：
 ```
-UCloud Cleaner Web 已启动
+UCloud Cleaner 已启动
 本地访问: http://127.0.0.1:8080
 按 Ctrl+C 退出
 ```

@@ -159,7 +159,7 @@ if __name__ == "__main__":
     app, _ = create_app(testing=False)
     host = cfg.get("host", "127.0.0.1")
     port = int(cfg.get("port", 5000))
-    print(f"UCloud Cleaner Web 已启动")
+    print(f"UCloud Cleaner 已启动")
     print(f"访问地址: http://{host}:{port}")
     print(f"按 Ctrl+C 退出")
     app.run(host=host, port=port, threaded=True, use_reloader=False)
