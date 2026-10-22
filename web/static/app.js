@@ -15,6 +15,7 @@ const state = {
   currentLogTaskId: null,
   logCount: 0,
   editingAccount: null,    // 正在编辑的账号 ID；null = 新增
+  selectedAccountIds: new Set(),  // 批量选择的账号 ID
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -23,6 +24,20 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
   }[c]));
+}
+
+function showToast(message, type = "success") {
+  const container = $("#toast-container");
+  if (!container) return;
+  const el = document.createElement("div");
+  el.className = `toast ${type === "error" ? "error" : ""}`;
+  el.textContent = message;
+  container.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 200);
+  }, 2500);
 }
 
 // ---------- localStorage ----------
@@ -378,16 +393,30 @@ function renderAccountTable() {
   const empty = $("#account-empty");
   if (!state.accounts.length) {
     empty.classList.remove("hidden");
+    updateBatchUI();
     return;
   }
   empty.classList.add("hidden");
   for (const a of state.accounts) {
     const tr = document.createElement("tr");
 
+    const checkTd = document.createElement("td");
+    checkTd.className = "col-check";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "account-check";
+    cb.value = a.id;
+    cb.checked = state.selectedAccountIds.has(a.id);
+    cb.addEventListener("change", () => {
+      cb.checked ? state.selectedAccountIds.add(a.id) : state.selectedAccountIds.delete(a.id);
+      updateBatchUI();
+    });
+    checkTd.appendChild(cb);
+
     const idTd = document.createElement("td");
-    idTd.className = "ellipsis account-id";
+    idTd.className = "account-id";
     idTd.title = a.id;
-    idTd.textContent = a.id;
+    idTd.textContent = a.id.slice(0, 8) + "...";
 
     const nameTd = document.createElement("td");
     nameTd.textContent = a.name;
@@ -404,7 +433,7 @@ function renderAccountTable() {
     actTd.className = "actions";
     const editBtn = document.createElement("button");
     editBtn.type = "button";
-    editBtn.className = "btn btn-sm btn-secondary";
+    editBtn.className = "btn btn-sm btn-primary";
     editBtn.textContent = "编辑";
     editBtn.addEventListener("click", () => showAccountForm(a));
     const delBtn = document.createElement("button");
@@ -415,12 +444,62 @@ function renderAccountTable() {
     actTd.appendChild(editBtn);
     actTd.appendChild(delBtn);
 
+    tr.appendChild(checkTd);
     tr.appendChild(idTd);
     tr.appendChild(nameTd);
     tr.appendChild(envTd);
     tr.appendChild(keyTd);
     tr.appendChild(actTd);
     body.appendChild(tr);
+  }
+  updateBatchUI();
+}
+
+function updateBatchUI() {
+  const btn = $("#account-batch-delete");
+  const count = state.selectedAccountIds.size;
+  if (btn) {
+    btn.disabled = count === 0;
+    btn.textContent = count ? `批量删除 (${count})` : "批量删除";
+  }
+  const selectAll = $("#account-select-all");
+  if (selectAll) {
+    const ids = state.accounts.map((a) => a.id);
+    selectAll.checked = ids.length > 0 && ids.every((id) => state.selectedAccountIds.has(id));
+  }
+}
+
+async function batchDeleteAccounts() {
+  const ids = [...state.selectedAccountIds];
+  if (!ids.length) return;
+  if (!confirm(`确认删除选中的 ${ids.length} 个账号？`)) return;
+  const wasSelected = ids.includes(state.selectedAccount);
+  let ok = 0;
+  let fail = 0;
+  for (const id of ids) {
+    try {
+      await api(`/api/accounts?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      ok++;
+    } catch (e) {
+      fail++;
+    }
+  }
+  state.selectedAccountIds = new Set();
+  await loadAccounts();
+  if (wasSelected) {
+    state.selectedRegions = new Set();
+    state.projects = [];
+    state.selectedProjects = new Set();
+    renderProjects();
+    renderRegions();
+    $("#projects-msg").textContent = "";
+    saveConfig();
+    await loadRegions();
+  }
+  if (fail) {
+    showToast(`已删除 ${ok} 个账号，${fail} 个失败`, "error");
+  } else {
+    showToast(`已删除 ${ok} 个账号`);
   }
 }
 
@@ -429,6 +508,7 @@ async function deleteAccount(account) {
   try {
     await api(`/api/accounts?id=${encodeURIComponent(account.id)}`, { method: "DELETE" });
     const wasSelected = state.selectedAccount === account.id;
+    state.selectedAccountIds.delete(account.id);
     await loadAccounts();
     if (wasSelected) {
       state.selectedAccount = state.accounts.length ? state.accounts[0].id : "";
@@ -442,8 +522,9 @@ async function deleteAccount(account) {
       saveConfig();
       await loadRegions();
     }
+    showToast("账号已删除");
   } catch (e) {
-    alert(e.message);
+    showToast(e.message, "error");
   }
 }
 
@@ -571,6 +652,11 @@ function bindForm() {
   $("#account-modal-close").addEventListener("click", closeAccountModal);
   $("#account-add").addEventListener("click", () => showAccountForm(null));
   $("#acc-form-cancel").addEventListener("click", showAccountList);
+  $("#account-select-all").addEventListener("change", (e) => {
+    state.selectedAccountIds = e.target.checked ? new Set(state.accounts.map((a) => a.id)) : new Set();
+    renderAccountTable();
+  });
+  $("#account-batch-delete").addEventListener("click", batchDeleteAccounts);
 
   // 点击遮罩关闭弹窗
   $("#account-modal").addEventListener("click", (e) => {
@@ -613,8 +699,9 @@ function bindForm() {
         $("#projects-msg").textContent = "";
         await loadRegions();
       }
+      showToast("账号已保存");
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   });
 

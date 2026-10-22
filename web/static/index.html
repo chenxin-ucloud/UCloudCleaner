@@ -16,7 +16,7 @@
       <label>账号
         <div class="account-row">
           <select id="account-select"></select>
-          <button type="button" class="btn btn-sm btn-secondary" id="manage-accounts">管理账号</button>
+          <button type="button" class="btn btn-primary" id="manage-accounts">管理账号</button>
         </div>
       </label>
       <div style="margin-bottom: 10px;">
@@ -99,11 +99,15 @@
           <button type="button" class="modal-close" id="account-modal-close">×</button>
         </div>
         <div class="modal-head-actions">
-          <button type="button" class="btn btn-primary btn-sm" id="account-add">新增账号</button>
+          <button type="button" class="btn btn-primary" id="account-add">新增账号</button>
+          <button type="button" class="btn btn-danger" id="account-batch-delete" disabled>批量删除</button>
         </div>
         <table class="account-table">
           <thead>
-            <tr><th>账号ID</th><th>账号名称</th><th>环境</th><th>公钥</th><th>操作</th></tr>
+            <tr>
+              <th class="col-check"><input type="checkbox" id="account-select-all" /></th>
+              <th>账号ID</th><th>账号名称</th><th>环境</th><th>公钥</th><th>操作</th>
+            </tr>
           </thead>
           <tbody id="account-table-body"></tbody>
         </table>
@@ -138,6 +142,9 @@
       </div>
     </div>
   </div>
+
+  <!-- 全局提示 -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="/app.js"></script>
 </body>
