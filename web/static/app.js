@@ -177,6 +177,11 @@ function renderProjects() {
   }
 }
 
+function visibleRegionNames() {
+  const q = ($("#region-search").value || "").trim().toLowerCase();
+  return Object.keys(state.regions).filter((n) => !q || n.toLowerCase().includes(q));
+}
+
 function renderRegions() {
   const root = $("#regions");
   root.innerHTML = "";
@@ -184,9 +189,13 @@ function renderRegions() {
     root.innerHTML = '<p class="empty-hint">请先添加并选择账号</p>';
     return;
   }
-  const names = Object.keys(state.regions);
+  if (!Object.keys(state.regions).length) {
+    root.innerHTML = '<p class="empty-hint">未获取到地域</p>';
+    return;
+  }
+  const names = visibleRegionNames();
   if (!names.length) {
-    root.innerHTML = '<p class="empty-hint">未获取到地域（正式环境依赖 GetRegion）</p>';
+    root.innerHTML = '<p class="empty-hint">无匹配区域</p>';
     return;
   }
   for (const name of names) {
@@ -485,7 +494,12 @@ document.addEventListener("click", async (e) => {
     const target = btn.dataset.target;
     const checked = action === "select-all";
     if (target === "regions") {
-      state.selectedRegions = checked ? new Set(Object.keys(state.regions)) : new Set();
+      const names = visibleRegionNames();
+      if (checked) {
+        for (const n of names) state.selectedRegions.add(n);
+      } else {
+        for (const n of names) state.selectedRegions.delete(n);
+      }
       saveConfig();
       renderRegions();
     } else if (target === "resources") {
@@ -598,6 +612,11 @@ function bindForm() {
     }
   });
 
+  $("#region-search").addEventListener("input", renderRegions);
+  $("#region-search-clear").addEventListener("click", () => {
+    $("#region-search").value = "";
+    renderRegions();
+  });
   $("#fetch-projects").addEventListener("click", fetchProjects);
   $("#submit-btn").addEventListener("click", onSubmit);
 }

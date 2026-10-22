@@ -38,6 +38,13 @@
         <div class="select-bar">
           <button class="btn btn-sm btn-secondary" data-action="select-all" data-target="regions">全选</button>
           <button class="btn btn-sm btn-secondary" data-action="select-none" data-target="regions">取消选择</button>
+          <div class="search-box">
+            <input id="region-search" type="text" class="search-input" placeholder="搜索区域" autocomplete="off" />
+            <button type="button" class="search-clear" id="region-search-clear" title="清除">×</button>
+            <span class="search-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </span>
+          </div>
         </div>
         <div id="regions" class="checkbox-grid"></div>
       </fieldset>
