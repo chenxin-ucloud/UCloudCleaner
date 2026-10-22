@@ -1,9 +1,13 @@
 {
-    "测试03": {
+    "测试03可用区A(test03-01)": {
         "Region": "test03",
         "Zone": "test03-01"
     },
-    "测试05": {
+    "测试03可用区B(test03-02)": {
+        "Region": "test03",
+        "Zone": "test03-02"
+    },
+    "测试05可用区A(test05-01)": {
         "Region": "test05",
         "Zone": "test05-01"
     }
