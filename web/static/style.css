@@ -195,7 +195,7 @@ legend { font-size: 12px; color: #4B5563; padding: 0 4px; }
   display: flex; align-items: flex-start; justify-content: center;
   padding: 48px 16px;
 }
-.modal.hidden { display: none; }
+.hidden { display: none; }
 .modal-box {
   background: #fff; border-radius: 6px; padding: 16px;
   width: 100%; max-width: 480px;
@@ -206,15 +206,13 @@ legend { font-size: 12px; color: #4B5563; padding: 0 4px; }
 .modal-close {
   border: 0; background: none; font-size: 20px; cursor: pointer; color: #6B7280;
 }
-.account-list { margin: 12px 0; max-height: 200px; overflow-y: auto; }
-.account-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 8px; border: 1px solid #E5E7EB; border-radius: 4px; margin-bottom: 6px;
-}
-.account-item .account-info { flex: 1; min-width: 0; }
-.account-item .account-name { font-weight: 500; font-size: 13px; }
-.account-item .account-url { font-size: 11px; color: #6B7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.account-item .actions { display: flex; gap: 4px; }
+.modal-page { max-width: 760px; max-height: 80vh; overflow-y: auto; }
+.modal-head-actions { margin: 4px 0 12px; }
+.account-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.account-table th, .account-table td { padding: 8px; border-bottom: 1px solid #E5E7EB; text-align: left; vertical-align: middle; }
+.account-table th { color: #6B7280; font-weight: 500; font-size: 12px; }
+.account-table td.ellipsis { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-table .actions { display: flex; gap: 4px; }
 .account-form input, .account-form select { margin-bottom: 0; }
 .req { color: #DC2626; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }

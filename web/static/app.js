@@ -66,7 +66,7 @@ async function loadAccounts() {
   const body = await api("/api/accounts");
   state.accounts = body.accounts || [];
   renderAccounts();
-  renderAccountList();
+  renderAccountTable();
 }
 
 async function loadRegions() {
@@ -327,65 +327,87 @@ function projectLabels(names) {
   return `${names[0]} 等 ${names.length} 个项目`;
 }
 
-// ---------- 账号管理弹窗 ----------
+// ---------- 账号管理 ----------
+function envLabel(baseUrl) {
+  return /test/i.test(baseUrl || "") ? "测试环境" : "正式环境";
+}
+
 function openAccountModal() {
   $("#account-modal").classList.remove("hidden");
-  resetAccountForm();
-  renderAccountList();
+  showAccountList();
 }
 
 function closeAccountModal() {
   $("#account-modal").classList.add("hidden");
 }
 
-function resetAccountForm() {
-  state.editingAccount = null;
+function showAccountList() {
+  $("#account-list-view").classList.remove("hidden");
+  $("#account-form-view").classList.add("hidden");
+}
+
+function showAccountForm(account) {
+  // account: null => 新增，否则编辑
+  state.editingAccount = account ? account.name : null;
   $("#account-form").reset();
-  $("#acc-name").removeAttribute("readonly");
+  if (account) {
+    $("#account-form-title").textContent = "编辑账号";
+    $("#acc-name").value = account.name;
+    $("#acc-base-url").value = account.base_url;
+    $("#acc-public-key").value = account.public_key;
+    $("#acc-private-key").value = account.private_key;
+    $("#acc-name").setAttribute("readonly", "readonly"); // 名称为主键，编辑时锁定
+  } else {
+    $("#account-form-title").textContent = "新增账号";
+    $("#acc-name").removeAttribute("readonly");
+  }
+  $("#account-list-view").classList.add("hidden");
+  $("#account-form-view").classList.remove("hidden");
 }
 
-function fillAccountForm(a) {
-  state.editingAccount = a.name;
-  $("#acc-name").value = a.name;
-  $("#acc-base-url").value = a.base_url;
-  $("#acc-public-key").value = a.public_key;
-  $("#acc-private-key").value = a.private_key;
-  $("#acc-name").setAttribute("readonly", "readonly"); // 名称为主键，编辑时锁定
-}
-
-function renderAccountList() {
-  const root = $("#account-list");
-  root.innerHTML = "";
+function renderAccountTable() {
+  const body = $("#account-table-body");
+  body.innerHTML = "";
+  const empty = $("#account-empty");
   if (!state.accounts.length) {
-    root.innerHTML = '<p class="empty-hint">暂无账号，请在下方新增</p>';
+    empty.classList.remove("hidden");
     return;
   }
+  empty.classList.add("hidden");
   for (const a of state.accounts) {
-    const item = document.createElement("div");
-    item.className = "account-item";
+    const tr = document.createElement("tr");
 
-    const info = document.createElement("div");
-    info.className = "account-info";
-    info.innerHTML = `<div class="account-name">${escapeHtml(a.name)}</div><div class="account-url">${escapeHtml(a.base_url)}</div>`;
+    const nameTd = document.createElement("td");
+    nameTd.textContent = a.name;
 
-    const actions = document.createElement("div");
-    actions.className = "actions";
+    const envTd = document.createElement("td");
+    envTd.textContent = envLabel(a.base_url);
+
+    const keyTd = document.createElement("td");
+    keyTd.className = "ellipsis";
+    keyTd.title = a.public_key;
+    keyTd.textContent = a.public_key;
+
+    const actTd = document.createElement("td");
+    actTd.className = "actions";
     const editBtn = document.createElement("button");
     editBtn.type = "button";
     editBtn.className = "btn btn-sm btn-secondary";
     editBtn.textContent = "编辑";
-    editBtn.addEventListener("click", () => fillAccountForm(a));
+    editBtn.addEventListener("click", () => showAccountForm(a));
     const delBtn = document.createElement("button");
     delBtn.type = "button";
     delBtn.className = "btn btn-sm btn-danger";
     delBtn.textContent = "删除";
     delBtn.addEventListener("click", () => deleteAccount(a.name));
-    actions.appendChild(editBtn);
-    actions.appendChild(delBtn);
+    actTd.appendChild(editBtn);
+    actTd.appendChild(delBtn);
 
-    item.appendChild(info);
-    item.appendChild(actions);
-    root.appendChild(item);
+    tr.appendChild(nameTd);
+    tr.appendChild(envTd);
+    tr.appendChild(keyTd);
+    tr.appendChild(actTd);
+    body.appendChild(tr);
   }
 }
 
@@ -529,10 +551,8 @@ function bindForm() {
 
   $("#manage-accounts").addEventListener("click", openAccountModal);
   $("#account-modal-close").addEventListener("click", closeAccountModal);
-  $("#acc-form-cancel").addEventListener("click", () => {
-    resetAccountForm();
-    renderAccountList();
-  });
+  $("#account-add").addEventListener("click", () => showAccountForm(null));
+  $("#acc-form-cancel").addEventListener("click", showAccountList);
 
   // 点击遮罩关闭弹窗
   $("#account-modal").addEventListener("click", (e) => {
@@ -563,8 +583,7 @@ function bindForm() {
       await loadAccounts();
       if (editingName == null) state.selectedAccount = payload.name;
       renderAccounts();
-      renderAccountList();
-      resetAccountForm();
+      showAccountList();
       saveConfig();
       if (affectsSelection) {
         state.selectedRegions = new Set();

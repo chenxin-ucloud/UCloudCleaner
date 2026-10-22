@@ -83,35 +83,52 @@
     </section>
   </main>
 
-  <!-- 账号管理弹窗 -->
+  <!-- 账号管理 -->
   <div id="account-modal" class="modal hidden">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h3>账号管理</h3>
-        <button type="button" class="modal-close" id="account-modal-close">×</button>
-      </div>
-      <div id="account-list" class="account-list"></div>
-      <form id="account-form" class="account-form">
-        <label>账号名称 <span class="req">*</span>
-          <input id="acc-name" placeholder="账号名称" autocomplete="off" />
-        </label>
-        <label>环境地址 <span class="req">*</span>
-          <select id="acc-base-url">
-            <option value="https://api.ucloud.cn">正式环境 · https://api.ucloud.cn</option>
-            <option value="http://api-test03.ucloudadmin.com">测试环境 · http://api-test03.ucloudadmin.com</option>
-          </select>
-        </label>
-        <label>公钥 <span class="req">*</span>
-          <input id="acc-public-key" placeholder="公钥" autocomplete="off" />
-        </label>
-        <label>私钥 <span class="req">*</span>
-          <input id="acc-private-key" placeholder="私钥" type="password" autocomplete="off" />
-        </label>
-        <div class="modal-actions">
-          <button type="submit" class="btn btn-primary">保存账号</button>
-          <button type="button" class="btn btn-secondary" id="acc-form-cancel">取消编辑</button>
+    <div class="modal-box modal-page">
+      <div id="account-list-view">
+        <div class="modal-head">
+          <h3>账号管理</h3>
+          <button type="button" class="modal-close" id="account-modal-close">×</button>
         </div>
-      </form>
+        <div class="modal-head-actions">
+          <button type="button" class="btn btn-primary btn-sm" id="account-add">新增账号</button>
+        </div>
+        <table class="account-table">
+          <thead>
+            <tr><th>账号名称</th><th>环境</th><th>公钥</th><th>操作</th></tr>
+          </thead>
+          <tbody id="account-table-body"></tbody>
+        </table>
+        <p id="account-empty" class="empty-hint hidden">暂无账号，点击「新增账号」创建</p>
+      </div>
+
+      <div id="account-form-view" class="hidden">
+        <div class="modal-head">
+          <h3 id="account-form-title">新增账号</h3>
+        </div>
+        <form id="account-form" class="account-form">
+          <label>账号名称 <span class="req">*</span>
+            <input id="acc-name" placeholder="账号名称" autocomplete="off" />
+          </label>
+          <label>环境地址 <span class="req">*</span>
+            <select id="acc-base-url">
+              <option value="https://api.ucloud.cn">正式环境 · https://api.ucloud.cn</option>
+              <option value="http://api-test03.ucloudadmin.com">测试环境 · http://api-test03.ucloudadmin.com</option>
+            </select>
+          </label>
+          <label>公钥 <span class="req">*</span>
+            <input id="acc-public-key" placeholder="公钥" autocomplete="off" />
+          </label>
+          <label>私钥 <span class="req">*</span>
+            <input id="acc-private-key" placeholder="私钥" type="password" autocomplete="off" />
+          </label>
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-primary">保存账号</button>
+            <button type="button" class="btn btn-secondary" id="acc-form-cancel">返回列表</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
