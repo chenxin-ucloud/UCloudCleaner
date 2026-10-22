@@ -1,8 +1,8 @@
 "use strict";
 
 const state = {
-  accounts: [],            // [{name, base_url, public_key, private_key}, ...]
-  selectedAccount: "",     // 账号名称
+  accounts: [],            // [{id, name, base_url, public_key, private_key}, ...]
+  selectedAccount: "",     // 账号 ID
   projects: [],            // [{project_id, name, create_time}, ...]
   selectedProjects: new Set(),
   regions: {},
@@ -14,7 +14,7 @@ const state = {
   historyCollapsed: {},    // task_id -> bool；默认收起
   currentLogTaskId: null,
   logCount: 0,
-  editingAccount: null,    // 正在编辑的账号名称；null = 新增
+  editingAccount: null,    // 正在编辑的账号 ID；null = 新增
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -76,7 +76,7 @@ async function loadRegions() {
     return;
   }
   try {
-    state.regions = await api(`/api/regions?account=${encodeURIComponent(state.selectedAccount)}`);
+    state.regions = await api(`/api/regions?account_id=${encodeURIComponent(state.selectedAccount)}`);
   } catch (e) {
     state.regions = {};
   }
@@ -109,7 +109,7 @@ async function fetchProjects() {
     const body = await api("/api/projects", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ account: state.selectedAccount }),
+      body: JSON.stringify({ account_id: state.selectedAccount }),
     });
     state.projects = body.projects || [];
     // 自动保留之前已选且仍存在的项目
@@ -142,14 +142,14 @@ function renderAccounts() {
   }
   for (const a of state.accounts) {
     const opt = document.createElement("option");
-    opt.value = a.name;
+    opt.value = a.id;
     opt.textContent = a.name;
     sel.appendChild(opt);
   }
-  if (state.selectedAccount && state.accounts.some((a) => a.name === state.selectedAccount)) {
+  if (state.selectedAccount && state.accounts.some((a) => a.id === state.selectedAccount)) {
     sel.value = state.selectedAccount;
   } else {
-    state.selectedAccount = state.accounts[0].name;
+    state.selectedAccount = state.accounts[0].id;
     sel.value = state.selectedAccount;
   }
 }
@@ -317,7 +317,7 @@ function renderHistory() {
       <div class="details">
         <dl>
           <dt>Task ID</dt><dd><code>${t.task_id}</code></dd>
-          <dt>账号</dt><dd>${escapeHtml(t.account_name || "")}</dd>
+          <dt>账号</dt><dd>${escapeHtml(t.account_name || "")} <code>${escapeHtml(t.account_id || "")}</code></dd>
           <dt>环境</dt><dd>${escapeHtml(t.env_name)}</dd>
           <dt>项目</dt><dd><div class="tag-list">${projectNames.map(s => `<span class="tag">${escapeHtml(s)}</span>`).join('')}</div></dd>
           <dt>区域</dt><dd><div class="tag-list">${t.selected_regions.map(r => `<span class="tag">${escapeHtml(r)}</span>`).join('')}</div></dd>
@@ -357,7 +357,7 @@ function showAccountList() {
 
 function showAccountForm(account) {
   // account: null => 新增，否则编辑
-  state.editingAccount = account ? account.name : null;
+  state.editingAccount = account ? account.id : null;
   $("#account-form").reset();
   if (account) {
     $("#account-form-title").textContent = "编辑账号";
@@ -365,10 +365,8 @@ function showAccountForm(account) {
     $("#acc-base-url").value = account.base_url;
     $("#acc-public-key").value = account.public_key;
     $("#acc-private-key").value = account.private_key;
-    $("#acc-name").setAttribute("readonly", "readonly"); // 名称为主键，编辑时锁定
   } else {
     $("#account-form-title").textContent = "新增账号";
-    $("#acc-name").removeAttribute("readonly");
   }
   $("#account-list-view").classList.add("hidden");
   $("#account-form-view").classList.remove("hidden");
@@ -385,6 +383,11 @@ function renderAccountTable() {
   empty.classList.add("hidden");
   for (const a of state.accounts) {
     const tr = document.createElement("tr");
+
+    const idTd = document.createElement("td");
+    idTd.className = "ellipsis account-id";
+    idTd.title = a.id;
+    idTd.textContent = a.id;
 
     const nameTd = document.createElement("td");
     nameTd.textContent = a.name;
@@ -408,10 +411,11 @@ function renderAccountTable() {
     delBtn.type = "button";
     delBtn.className = "btn btn-sm btn-danger";
     delBtn.textContent = "删除";
-    delBtn.addEventListener("click", () => deleteAccount(a.name));
+    delBtn.addEventListener("click", () => deleteAccount(a));
     actTd.appendChild(editBtn);
     actTd.appendChild(delBtn);
 
+    tr.appendChild(idTd);
     tr.appendChild(nameTd);
     tr.appendChild(envTd);
     tr.appendChild(keyTd);
@@ -420,14 +424,14 @@ function renderAccountTable() {
   }
 }
 
-async function deleteAccount(name) {
-  if (!confirm(`确认删除账号「${name}」？`)) return;
+async function deleteAccount(account) {
+  if (!confirm(`确认删除账号「${account.name}」？`)) return;
   try {
-    await api(`/api/accounts?name=${encodeURIComponent(name)}`, { method: "DELETE" });
-    const wasSelected = state.selectedAccount === name;
+    await api(`/api/accounts?id=${encodeURIComponent(account.id)}`, { method: "DELETE" });
+    const wasSelected = state.selectedAccount === account.id;
     await loadAccounts();
     if (wasSelected) {
-      state.selectedAccount = state.accounts.length ? state.accounts[0].name : "";
+      state.selectedAccount = state.accounts.length ? state.accounts[0].id : "";
       renderAccounts();
       state.selectedRegions = new Set();
       state.projects = [];
@@ -586,16 +590,18 @@ function bindForm() {
     if (!payload.public_key) return alert("请填写公钥");
     if (!payload.private_key) return alert("请填写私钥");
 
-    const editingName = state.editingAccount;
-    const affectsSelection = editingName == null || editingName === state.selectedAccount;
+    const editingId = state.editingAccount;
+    const affectsSelection = editingId == null || editingId === state.selectedAccount;
     try {
-      await api("/api/accounts", {
+      const body = { ...payload };
+      if (editingId != null) body.id = editingId;
+      const res = await api("/api/accounts", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
       });
       await loadAccounts();
-      if (editingName == null) state.selectedAccount = payload.name;
+      if (affectsSelection) state.selectedAccount = res.account.id;
       renderAccounts();
       showAccountList();
       saveConfig();
@@ -625,7 +631,7 @@ async function onSubmit() {
   const err = $("#submit-error"); err.textContent = "";
   if (!state.selectedAccount) return err.textContent = "请选择账号";
   const payload = {
-    account: state.selectedAccount,
+    account_id: state.selectedAccount,
     project_ids: [...state.selectedProjects],
     selected_regions: [...state.selectedRegions],
     selected_resources: [...state.selectedResources],

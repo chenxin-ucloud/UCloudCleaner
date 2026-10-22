@@ -43,19 +43,19 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
 
     @app.route("/api/accounts", methods=["DELETE"])
     def remove_account():
-        name = (request.args.get("name") or "").strip()
-        if not name:
-            return _err("INVALID_PARAM", 400, "name 不能为空")
-        if not accounts.delete_account(name):
+        account_id = (request.args.get("id") or "").strip()
+        if not account_id:
+            return _err("INVALID_PARAM", 400, "id 不能为空")
+        if not accounts.delete_account(account_id):
             return _err("ACCOUNT_NOT_FOUND", 404)
         return jsonify(ok=True)
 
     @app.route("/api/regions")
     def get_regions():
-        account_name = (request.args.get("account") or "").strip()
-        if not account_name:
+        account_id = (request.args.get("account_id") or "").strip()
+        if not account_id:
             return jsonify({})
-        acct = accounts.get_account(account_name)
+        acct = accounts.get_account(account_id)
         if not acct:
             return _err("ACCOUNT_NOT_FOUND", 404)
         env_name = resolve_env_name(acct["base_url"])
@@ -76,10 +76,10 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
     @app.route("/api/projects", methods=["POST"])
     def get_projects():
         payload = request.get_json(silent=True) or {}
-        account_name = (payload.get("account") or "").strip()
-        if not account_name:
-            return _err("INVALID_PARAM", 400, "account 不能为空")
-        acct = accounts.get_account(account_name)
+        account_id = (payload.get("account_id") or "").strip()
+        if not account_id:
+            return _err("INVALID_PARAM", 400, "account_id 不能为空")
+        acct = accounts.get_account(account_id)
         if not acct:
             return _err("ACCOUNT_NOT_FOUND", 404)
         projects = fetch_project_list(
@@ -90,10 +90,10 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
     VALID_RESOURCE_NAMES = {name for name, _ in DELETE_OPERATIONS}
 
     def _resolve_account(payload: dict):
-        account_name = (payload.get("account") or "").strip()
-        if not account_name:
-            return None, "account 不能为空"
-        acct = accounts.get_account(account_name)
+        account_id = (payload.get("account_id") or "").strip()
+        if not account_id:
+            return None, "account_id 不能为空"
+        acct = accounts.get_account(account_id)
         if not acct:
             return None, "账号不存在"
         return acct, None
@@ -134,9 +134,10 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
         err = _validate_payload(payload)
         if err:
             return _err("INVALID_PARAM", 400, err)
-        acct = accounts.get_account((payload.get("account") or "").strip())
+        acct = accounts.get_account((payload.get("account_id") or "").strip())
         task = Task(
             task_id=uuid.uuid4().hex[:8],
+            account_id=acct["id"],
             account_name=acct["name"],
             env_name=resolve_env_name(acct["base_url"]),
             api_url=acct["base_url"],

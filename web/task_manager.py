@@ -45,6 +45,7 @@ class Task:
     submitted_at: float = field(default_factory=time.time)
     started_at: Optional[float] = None
     finished_at: Optional[float] = None
+    account_id: str = ""
     account_name: str = ""
     env_name: str = "正式环境"
     api_url: str = ""
@@ -75,6 +76,7 @@ class Task:
             "submitted_at": self.submitted_at,
             "started_at": self.started_at,
             "finished_at": self.finished_at,
+            "account_id": self.account_id,
             "account_name": self.account_name,
             "env_name": self.env_name,
             "api_url": self.api_url,
