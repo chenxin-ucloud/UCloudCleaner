@@ -11,6 +11,7 @@
 **/.DS_Store
 .pytest_cache
 /web/config.json
+/web/accounts.json
 pytest.ini
 tests/
 .pytest_cache

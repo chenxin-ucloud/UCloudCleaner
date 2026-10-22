@@ -184,3 +184,38 @@ legend { font-size: 12px; color: #4B5563; padding: 0 4px; }
 .status-succeeded { background: #D1FAE5; color: #065F46; }
 .status-failed    { background: #FEE2E2; color: #991B1B; }
 .status-stopped   { background: #E5E7EB; color: #374151; }
+
+/* 账号选择与账号管理弹窗 */
+.account-row { display: flex; gap: 6px; align-items: center; }
+.account-row select { margin-top: 0; flex: 1; }
+
+.modal {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(17, 24, 39, 0.4);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 48px 16px;
+}
+.modal.hidden { display: none; }
+.modal-box {
+  background: #fff; border-radius: 6px; padding: 16px;
+  width: 100%; max-width: 480px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; }
+.modal-head h3 { margin: 0; font-size: 14px; }
+.modal-close {
+  border: 0; background: none; font-size: 20px; cursor: pointer; color: #6B7280;
+}
+.account-list { margin: 12px 0; max-height: 200px; overflow-y: auto; }
+.account-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border: 1px solid #E5E7EB; border-radius: 4px; margin-bottom: 6px;
+}
+.account-item .account-info { flex: 1; min-width: 0; }
+.account-item .account-name { font-weight: 500; font-size: 13px; }
+.account-item .account-url { font-size: 11px; color: #6B7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-item .actions { display: flex; gap: 4px; }
+.account-form input, .account-form select { margin-bottom: 0; }
+.req { color: #DC2626; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.empty-hint { color: #9CA3AF; font-size: 12px; }

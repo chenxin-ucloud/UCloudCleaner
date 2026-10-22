@@ -6,6 +6,8 @@ from typing import Optional, Tuple
 from flask import Flask, Response, jsonify, request, send_from_directory
 
 from sdk.delete_all_resources import DELETE_OPERATIONS, fetch_project_list
+from sdk.runner_core import resolve_env_name
+from web import accounts
 from web.sse import stream_events
 from web.task_manager import Task, TaskManager, _load_regions_for_env
 
@@ -26,12 +28,39 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
     def index():
         return send_from_directory(app.static_folder, "index.html")
 
+    @app.route("/api/accounts", methods=["GET"])
+    def get_accounts():
+        return jsonify(accounts=accounts.list_accounts())
+
+    @app.route("/api/accounts", methods=["POST"])
+    def save_account():
+        payload = request.get_json(silent=True) or {}
+        try:
+            acct = accounts.upsert_account(payload)
+        except ValueError as e:
+            return _err("INVALID_PARAM", 400, str(e))
+        return jsonify(account=acct)
+
+    @app.route("/api/accounts/<name>", methods=["DELETE"])
+    def remove_account(name):
+        if not accounts.delete_account(name):
+            return _err("ACCOUNT_NOT_FOUND", 404)
+        return jsonify(ok=True)
+
     @app.route("/api/regions")
     def get_regions():
-        env = request.args.get("env", "prod")
-        env_name = "测试环境" if env == "test" else "正式环境"
+        account_name = (request.args.get("account") or "").strip()
+        if not account_name:
+            return jsonify({})
+        acct = accounts.get_account(account_name)
+        if not acct:
+            return _err("ACCOUNT_NOT_FOUND", 404)
+        env_name = resolve_env_name(acct["base_url"])
         try:
-            return jsonify(_load_regions_for_env(env_name))
+            regions = _load_regions_for_env(
+                env_name, acct["public_key"], acct["private_key"], acct["base_url"] or None
+            )
+            return jsonify(regions)
         except FileNotFoundError as e:
             return _err("INTERNAL", 500, str(e))
 
@@ -46,43 +75,49 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
     @app.route("/api/projects", methods=["POST"])
     def get_projects():
         payload = request.get_json(silent=True) or {}
-        public_key = payload.get("public_key", "").strip()
-        private_key = payload.get("private_key", "").strip()
-        env_name = payload.get("env_name", "正式环境")
-        if not public_key:
-            return _err("INVALID_PARAM", 400, "public_key 不能为空")
-        if not private_key:
-            return _err("INVALID_PARAM", 400, "private_key 不能为空")
-        from sdk.runner_core import resolve_api_url
-        base_url = resolve_api_url(env_name, "")
-        projects = fetch_project_list(public_key, private_key, base_url=base_url or None)
+        account_name = (payload.get("account") or "").strip()
+        if not account_name:
+            return _err("INVALID_PARAM", 400, "account 不能为空")
+        acct = accounts.get_account(account_name)
+        if not acct:
+            return _err("ACCOUNT_NOT_FOUND", 404)
+        projects = fetch_project_list(
+            acct["public_key"], acct["private_key"], base_url=acct["base_url"] or None
+        )
         return jsonify(projects=projects)
 
-    VALID_ENVS = {"正式环境", "测试环境"}
     VALID_RESOURCE_NAMES = {name for name, _ in DELETE_OPERATIONS}
+
+    def _resolve_account(payload: dict):
+        account_name = (payload.get("account") or "").strip()
+        if not account_name:
+            return None, "account 不能为空"
+        acct = accounts.get_account(account_name)
+        if not acct:
+            return None, "账号不存在"
+        return acct, None
 
     def _validate_payload(payload: dict) -> Optional[str]:
         if not isinstance(payload, dict):
             return "请求体必须是 JSON 对象"
-        if not isinstance(payload.get("public_key"), str) or not payload["public_key"].strip():
-            return "public_key 不能为空"
-        if not isinstance(payload.get("private_key"), str) or not payload["private_key"].strip():
-            return "private_key 不能为空"
+        acct, err = _resolve_account(payload)
+        if err:
+            return err
         pids = payload.get("project_ids")
         if not isinstance(pids, list) or not pids or not all(isinstance(p, str) and p.strip() for p in pids):
             return "project_ids 必须是非空字符串数组"
-        env = payload.get("env_name")
-        if env not in VALID_ENVS:
-            return f"env_name 必须是 {VALID_ENVS} 之一"
         regions = payload.get("selected_regions")
         if not isinstance(regions, list) or not regions:
             return "selected_regions 不能为空"
         resources = payload.get("selected_resources")
         if not isinstance(resources, list) or not resources:
             return "selected_resources 不能为空"
-        # 区域必须是合法 key
+        # 区域必须是该账号对应环境下的合法 key
+        env_name = resolve_env_name(acct["base_url"])
         try:
-            valid_regions = set(_load_regions_for_env(env).keys())
+            valid_regions = set(_load_regions_for_env(
+                env_name, acct["public_key"], acct["private_key"], acct["base_url"] or None
+            ).keys())
         except FileNotFoundError as e:
             return f"区域文件加载失败: {e}"
         invalid_r = set(regions) - valid_regions
@@ -100,14 +135,14 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
         err = _validate_payload(payload)
         if err:
             return _err("INVALID_PARAM", 400, err)
-        from sdk.runner_core import resolve_api_url
-        api_url = resolve_api_url(payload["env_name"], "")
+        acct = accounts.get_account((payload.get("account") or "").strip())
         task = Task(
             task_id=uuid.uuid4().hex[:8],
-            env_name=payload["env_name"],
-            api_url=api_url,
-            public_key=payload["public_key"],
-            private_key=payload["private_key"],
+            account_name=acct["name"],
+            env_name=resolve_env_name(acct["base_url"]),
+            api_url=acct["base_url"],
+            public_key=acct["public_key"],
+            private_key=acct["private_key"],
             project_ids=[p.strip() for p in payload["project_ids"]],
             selected_regions=list(payload["selected_regions"]),
             selected_resources=list(payload["selected_resources"]),

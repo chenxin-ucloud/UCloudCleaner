@@ -20,6 +20,11 @@ def resolve_api_url(env_name: str, explicit: str) -> str:
     return ""
 
 
+def resolve_env_name(base_url: str) -> str:
+    """根据环境地址判断环境名：含 test → 测试环境，否则正式环境。"""
+    return "测试环境" if "test" in (base_url or "").lower() else "正式环境"
+
+
 def _log(sink, level: str, line: str):
     sink.put({"level": level, "line": line, "ts": time.time()})
 
@@ -39,7 +44,7 @@ def run_deletion_core(
     """按 region → project → resource 三层循环执行删除。
 
     Args:
-        regions: 完整区域 dict（已从 region.json 加载）
+        regions: 完整区域 dict（{区域名: {Region, Zone}}，来源可为 region 文件或 SDK GetRegion）
         project_ids: 项目 ID 列表
         public_key/private_key: UCloud API 凭证
         api_url: 自定义 base_url，None 表示用 SDK 默认

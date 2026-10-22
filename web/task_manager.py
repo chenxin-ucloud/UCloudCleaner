@@ -8,7 +8,8 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from sdk.runner_core import resolve_api_url, run_deletion_core
+from sdk.delete_all_resources import fetch_region_list
+from sdk.runner_core import run_deletion_core
 from web.log_handler import BufferHandler
 
 # SDK 内部 delete_* 函数通过 Python logging 输出日志（INFO/ERROR）。
@@ -22,10 +23,12 @@ _REGION_DIR = os.path.join(
 )
 
 
-def _load_regions_for_env(env_name: str) -> dict:
-    filename = "region_test.json" if env_name == "测试环境" else "region.json"
-    with open(os.path.join(_REGION_DIR, filename), "r", encoding="utf-8") as f:
-        return json.load(f)
+def _load_regions_for_env(env_name: str, public_key=None, private_key=None, base_url=None) -> dict:
+    if env_name == "测试环境":
+        with open(os.path.join(_REGION_DIR, "region_test.json"), "r", encoding="utf-8") as f:
+            return json.load(f)
+    # 正式环境：通过 SDK GetRegion 动态获取（无需 region.json）
+    return fetch_region_list(public_key, private_key, base_url=base_url or None)
 
 
 def _redact_public_key(pk: str) -> str:
@@ -43,6 +46,7 @@ class Task:
     submitted_at: float = field(default_factory=time.time)
     started_at: Optional[float] = None
     finished_at: Optional[float] = None
+    account_name: str = ""
     env_name: str = "正式环境"
     api_url: str = ""
     project_ids: List[str] = field(default_factory=list)
@@ -72,6 +76,7 @@ class Task:
             "submitted_at": self.submitted_at,
             "started_at": self.started_at,
             "finished_at": self.finished_at,
+            "account_name": self.account_name,
             "env_name": self.env_name,
             "api_url": self.api_url,
             "project_ids": list(self.project_ids),
@@ -126,14 +131,15 @@ class TaskManager:
             bridge = BufferHandler(task)
             sdk_logger.addHandler(bridge)
             try:
-                regions = _load_regions_for_env(task.env_name)
-                effective_api_url = resolve_api_url(task.env_name, task.api_url)
+                regions = _load_regions_for_env(
+                    task.env_name, task.public_key, task.private_key, task.api_url
+                )
                 run_deletion_core(
                     regions=regions,
                     project_ids=task.project_ids,
                     public_key=task.public_key,
                     private_key=task.private_key,
-                    api_url=effective_api_url,
+                    api_url=task.api_url or None,
                     selected_regions=task.selected_regions,
                     selected_resources=task.selected_resources,
                     log_sink=task,

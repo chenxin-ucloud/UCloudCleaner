@@ -1,8 +1,9 @@
 "use strict";
 
 const state = {
-  config: { env: "prod", public_key: "", private_key: "" },
-  projects: [],          // [{project_id, name, create_time}, ...]
+  accounts: [],            // [{name, base_url, public_key, private_key}, ...]
+  selectedAccount: "",     // 账号名称
+  projects: [],            // [{project_id, name, create_time}, ...]
   selectedProjects: new Set(),
   regions: {},
   resources: [],
@@ -10,24 +11,30 @@ const state = {
   selectedResources: new Set(),
   tasks: { running: null, pending: [], history: [] },
   subscriptions: {},
-  historyCollapsed: {},  // task_id -> bool；默认收起
+  historyCollapsed: {},    // task_id -> bool；默认收起
   currentLogTaskId: null,
   logCount: 0,
+  editingAccount: null,    // 正在编辑的账号名称；null = 新增
 };
 
 const $ = (sel) => document.querySelector(sel);
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
 
 // ---------- localStorage ----------
 const STORAGE_KEY = "ucc-web-config";
 
 function saveConfig() {
   const data = {
-    env: state.config.env,
-    public_key: state.config.public_key,
+    selectedAccount: state.selectedAccount,
     selectedProjects: [...state.selectedProjects],
     selectedRegions: [...state.selectedRegions],
     selectedResources: [...state.selectedResources],
-    // 私钥不持久化
+    // 公私钥不持久化，存于服务端 accounts.json
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
@@ -37,8 +44,7 @@ function loadConfig() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const data = JSON.parse(raw);
-    if (data.env) state.config.env = data.env;
-    state.config.public_key = data.public_key || "";
+    state.selectedAccount = data.selectedAccount || "";
     state.selectedProjects = new Set(data.selectedProjects || []);
     state.selectedRegions = new Set(data.selectedRegions || []);
     state.selectedResources = new Set(data.selectedResources || []);
@@ -56,8 +62,28 @@ async function api(path, opts = {}) {
   return body;
 }
 
+async function loadAccounts() {
+  const body = await api("/api/accounts");
+  state.accounts = body.accounts || [];
+  renderAccounts();
+  renderAccountList();
+}
+
 async function loadRegions() {
-  state.regions = await api(`/api/regions?env=${state.config.env}`);
+  if (!state.selectedAccount) {
+    state.regions = {};
+    renderRegions();
+    return;
+  }
+  try {
+    state.regions = await api(`/api/regions?account=${encodeURIComponent(state.selectedAccount)}`);
+  } catch (e) {
+    state.regions = {};
+  }
+  // 清理已失效的勾选
+  const valid = new Set(Object.keys(state.regions));
+  state.selectedRegions = new Set([...state.selectedRegions].filter((r) => valid.has(r)));
+  saveConfig();
   renderRegions();
 }
 
@@ -74,16 +100,16 @@ async function loadSnapshot() {
 
 async function fetchProjects() {
   const msg = $("#projects-msg");
+  if (!state.selectedAccount) {
+    msg.textContent = "请先选择账号";
+    return;
+  }
   msg.textContent = "加载中...";
   try {
     const body = await api("/api/projects", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        public_key: state.config.public_key.trim(),
-        private_key: state.config.private_key,
-        env_name: state.config.env === "test" ? "测试环境" : "正式环境",
-      }),
+      body: JSON.stringify({ account: state.selectedAccount }),
     });
     state.projects = body.projects || [];
     // 自动保留之前已选且仍存在的项目
@@ -95,9 +121,36 @@ async function fetchProjects() {
     renderProjects();
     msg.textContent = state.projects.length
       ? `已加载 ${state.projects.length} 个项目`
-      : "未获取到项目（请检查密钥）";
+      : "未获取到项目（请检查账号密钥）";
   } catch (e) {
     msg.textContent = e.message;
+  }
+}
+
+// ---------- 账号选择渲染 ----------
+function renderAccounts() {
+  const sel = $("#account-select");
+  sel.innerHTML = "";
+  if (!state.accounts.length) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "请先添加账号";
+    sel.appendChild(opt);
+    sel.value = "";
+    state.selectedAccount = "";
+    return;
+  }
+  for (const a of state.accounts) {
+    const opt = document.createElement("option");
+    opt.value = a.name;
+    opt.textContent = a.name;
+    sel.appendChild(opt);
+  }
+  if (state.selectedAccount && state.accounts.some((a) => a.name === state.selectedAccount)) {
+    sel.value = state.selectedAccount;
+  } else {
+    state.selectedAccount = state.accounts[0].name;
+    sel.value = state.selectedAccount;
   }
 }
 
@@ -127,7 +180,16 @@ function renderProjects() {
 function renderRegions() {
   const root = $("#regions");
   root.innerHTML = "";
-  for (const name of Object.keys(state.regions)) {
+  if (!state.selectedAccount) {
+    root.innerHTML = '<p class="empty-hint">请先添加并选择账号</p>';
+    return;
+  }
+  const names = Object.keys(state.regions);
+  if (!names.length) {
+    root.innerHTML = '<p class="empty-hint">未获取到地域（正式环境依赖 GetRegion）</p>';
+    return;
+  }
+  for (const name of names) {
     const id = `r-${name}`;
     const label = document.createElement("label");
     const cb = document.createElement("input");
@@ -228,7 +290,6 @@ function renderHistory() {
   root.innerHTML = state.tasks.history.slice().reverse().map(t => {
     // 默认收起（state.historyCollapsed[task_id] 默认未设置，未设置即视为收起 true）
     const collapsed = state.historyCollapsed[t.task_id] !== false;
-    // 标题栏：状态 + 项目名称(项目ID) 列表 + 完成时间
     const projectNames = t.project_ids.map(pid => {
       const info = state.projects.find(p => p.project_id === pid);
       const name = info ? info.name : pid;
@@ -247,11 +308,12 @@ function renderHistory() {
       <div class="details">
         <dl>
           <dt>Task ID</dt><dd><code>${t.task_id}</code></dd>
-          <dt>环境</dt><dd>${t.env_name}</dd>
-          <dt>项目</dt><dd><div class="tag-list">${projectNames.map(s => `<span class="tag">${s}</span>`).join('')}</div></dd>
-          <dt>区域</dt><dd><div class="tag-list">${t.selected_regions.map(r => `<span class="tag">${r}</span>`).join('')}</div></dd>
-          <dt>资源</dt><dd><div class="tag-list">${t.selected_resources.map(r => `<span class="tag">${r}</span>`).join('')}</div></dd>
-          <dt>公钥</dt><dd>${t.public_key}</dd>
+          <dt>账号</dt><dd>${escapeHtml(t.account_name || "")}</dd>
+          <dt>环境</dt><dd>${escapeHtml(t.env_name)}</dd>
+          <dt>项目</dt><dd><div class="tag-list">${projectNames.map(s => `<span class="tag">${escapeHtml(s)}</span>`).join('')}</div></dd>
+          <dt>区域</dt><dd><div class="tag-list">${t.selected_regions.map(r => `<span class="tag">${escapeHtml(r)}</span>`).join('')}</div></dd>
+          <dt>资源</dt><dd><div class="tag-list">${t.selected_resources.map(r => `<span class="tag">${escapeHtml(r)}</span>`).join('')}</div></dd>
+          <dt>公钥</dt><dd>${escapeHtml(t.public_key)}</dd>
         </dl>
       </div>
     </div>`;
@@ -263,6 +325,91 @@ function projectLabels(names) {
   if (!names.length) return '无项目';
   if (names.length === 1) return names[0];
   return `${names[0]} 等 ${names.length} 个项目`;
+}
+
+// ---------- 账号管理弹窗 ----------
+function openAccountModal() {
+  $("#account-modal").classList.remove("hidden");
+  resetAccountForm();
+  renderAccountList();
+}
+
+function closeAccountModal() {
+  $("#account-modal").classList.add("hidden");
+}
+
+function resetAccountForm() {
+  state.editingAccount = null;
+  $("#account-form").reset();
+  $("#acc-name").removeAttribute("readonly");
+}
+
+function fillAccountForm(a) {
+  state.editingAccount = a.name;
+  $("#acc-name").value = a.name;
+  $("#acc-base-url").value = a.base_url;
+  $("#acc-public-key").value = a.public_key;
+  $("#acc-private-key").value = a.private_key;
+  $("#acc-name").setAttribute("readonly", "readonly"); // 名称为主键，编辑时锁定
+}
+
+function renderAccountList() {
+  const root = $("#account-list");
+  root.innerHTML = "";
+  if (!state.accounts.length) {
+    root.innerHTML = '<p class="empty-hint">暂无账号，请在下方新增</p>';
+    return;
+  }
+  for (const a of state.accounts) {
+    const item = document.createElement("div");
+    item.className = "account-item";
+
+    const info = document.createElement("div");
+    info.className = "account-info";
+    info.innerHTML = `<div class="account-name">${escapeHtml(a.name)}</div><div class="account-url">${escapeHtml(a.base_url)}</div>`;
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "btn btn-sm btn-secondary";
+    editBtn.textContent = "编辑";
+    editBtn.addEventListener("click", () => fillAccountForm(a));
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "btn btn-sm btn-danger";
+    delBtn.textContent = "删除";
+    delBtn.addEventListener("click", () => deleteAccount(a.name));
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+
+    item.appendChild(info);
+    item.appendChild(actions);
+    root.appendChild(item);
+  }
+}
+
+async function deleteAccount(name) {
+  if (!confirm(`确认删除账号「${name}」？`)) return;
+  try {
+    await api(`/api/accounts/${encodeURIComponent(name)}`, { method: "DELETE" });
+    const wasSelected = state.selectedAccount === name;
+    await loadAccounts();
+    if (wasSelected) {
+      state.selectedAccount = state.accounts.length ? state.accounts[0].name : "";
+      renderAccounts();
+      state.selectedRegions = new Set();
+      state.projects = [];
+      state.selectedProjects = new Set();
+      renderProjects();
+      renderRegions();
+      $("#projects-msg").textContent = "";
+      saveConfig();
+      await loadRegions();
+    }
+  } catch (e) {
+    alert(e.message);
+  }
 }
 
 // ---------- 事件：全局日志面板 ----------
@@ -283,7 +430,7 @@ $("#clear-logs").addEventListener("click", () => {
 
 // ---------- 事件委托 ----------
 document.addEventListener("click", async (e) => {
-  // 历史任务卡片展开/收起（与运行日志样式一致）
+  // 历史任务卡片展开/收起
   const histToggle = e.target.closest("[data-action='toggle-history']");
   if (histToggle) {
     const taskId = histToggle.dataset.task;
@@ -368,38 +515,83 @@ function appendLog(taskId, item) {
 
 // ---------- 表单 ----------
 function bindForm() {
-  $("#env-select").value = state.config.env;
-  $("#public-key").value = state.config.public_key;
-
-  $("#env-select").addEventListener("change", async (e) => {
-    state.config.env = e.target.value;
+  $("#account-select").addEventListener("change", async (e) => {
+    state.selectedAccount = e.target.value;
     state.selectedRegions = new Set();
     state.projects = [];
     state.selectedProjects = new Set();
     renderProjects();
+    renderRegions();
     $("#projects-msg").textContent = "";
     saveConfig();
     await loadRegions();
   });
-  $("#public-key").addEventListener("input", (e) => { state.config.public_key = e.target.value; saveConfig(); });
-  $("#private-key").addEventListener("input", (e) => { state.config.private_key = e.target.value; /* 不存 */ });
-  $("#fetch-projects").addEventListener("click", fetchProjects);
 
+  $("#manage-accounts").addEventListener("click", openAccountModal);
+  $("#account-modal-close").addEventListener("click", closeAccountModal);
+  $("#acc-form-cancel").addEventListener("click", () => {
+    resetAccountForm();
+    renderAccountList();
+  });
+
+  // 点击遮罩关闭弹窗
+  $("#account-modal").addEventListener("click", (e) => {
+    if (e.target === $("#account-modal")) closeAccountModal();
+  });
+
+  $("#account-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {
+      name: $("#acc-name").value.trim(),
+      base_url: $("#acc-base-url").value.trim(),
+      public_key: $("#acc-public-key").value.trim(),
+      private_key: $("#acc-private-key").value.trim(),
+    };
+    if (!payload.name) return alert("请填写账号名称");
+    if (!payload.base_url) return alert("请填写环境地址");
+    if (!payload.public_key) return alert("请填写公钥");
+    if (!payload.private_key) return alert("请填写私钥");
+
+    const editingName = state.editingAccount;
+    const affectsSelection = editingName == null || editingName === state.selectedAccount;
+    try {
+      await api("/api/accounts", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      await loadAccounts();
+      if (editingName == null) state.selectedAccount = payload.name;
+      renderAccounts();
+      renderAccountList();
+      resetAccountForm();
+      saveConfig();
+      if (affectsSelection) {
+        state.selectedRegions = new Set();
+        state.projects = [];
+        state.selectedProjects = new Set();
+        renderProjects();
+        $("#projects-msg").textContent = "";
+        await loadRegions();
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  $("#fetch-projects").addEventListener("click", fetchProjects);
   $("#submit-btn").addEventListener("click", onSubmit);
 }
 
 async function onSubmit() {
   const err = $("#submit-error"); err.textContent = "";
+  if (!state.selectedAccount) return err.textContent = "请选择账号";
   const payload = {
-    env_name: state.config.env === "test" ? "测试环境" : "正式环境",
-    public_key: state.config.public_key.trim(),
-    private_key: state.config.private_key,
+    account: state.selectedAccount,
     project_ids: [...state.selectedProjects],
     selected_regions: [...state.selectedRegions],
     selected_resources: [...state.selectedResources],
   };
-  if (!payload.public_key) return err.textContent = "请填公钥";
-  if (!payload.private_key) return err.textContent = "请填私钥";
   if (!payload.project_ids.length) return err.textContent = "请至少选择 1 个项目";
   if (!payload.selected_regions.length) return err.textContent = "请至少勾选 1 个区域";
   if (!payload.selected_resources.length) return err.textContent = "请至少勾选 1 个资源类型";
@@ -421,7 +613,9 @@ async function onSubmit() {
 async function main() {
   loadConfig();
   bindForm();
-  await Promise.all([loadRegions(), loadResources(), loadSnapshot()]);
+  await loadAccounts();
+  await Promise.all([loadResources(), loadSnapshot()]);
+  await loadRegions();
   if (state.tasks.running) ensureSubscribed(state.tasks.running.task_id);
 }
 

@@ -13,15 +13,11 @@
   <main class="layout">
     <section class="panel form-panel">
       <h2>任务配置</h2>
-      <label>环境
-        <select id="env-select">
-          <option value="prod">正式环境</option>
-          <option value="test">测试环境</option>
-        </select>
-      </label>
-      <label>公钥<input id="public-key" type="text" autocomplete="off" /></label>
-      <label>私钥
-        <input id="private-key" type="password" autocomplete="off" />
+      <label>账号
+        <div class="account-row">
+          <select id="account-select"></select>
+          <button type="button" class="btn btn-sm btn-secondary" id="manage-accounts">管理账号</button>
+        </div>
       </label>
       <div style="margin-bottom: 10px;">
         <button class="btn btn-sm btn-secondary" id="fetch-projects">获取项目</button>
@@ -86,6 +82,39 @@
       <div id="history-list"></div>
     </section>
   </main>
+
+  <!-- 账号管理弹窗 -->
+  <div id="account-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>账号管理</h3>
+        <button type="button" class="modal-close" id="account-modal-close">×</button>
+      </div>
+      <div id="account-list" class="account-list"></div>
+      <form id="account-form" class="account-form">
+        <label>账号名称 <span class="req">*</span>
+          <input id="acc-name" placeholder="账号名称" autocomplete="off" />
+        </label>
+        <label>环境地址 <span class="req">*</span>
+          <select id="acc-base-url">
+            <option value="https://api.ucloud.cn">正式环境 · https://api.ucloud.cn</option>
+            <option value="http://api-test03.ucloudadmin.com">测试环境 · http://api-test03.ucloudadmin.com</option>
+          </select>
+        </label>
+        <label>公钥 <span class="req">*</span>
+          <input id="acc-public-key" placeholder="公钥" autocomplete="off" />
+        </label>
+        <label>私钥 <span class="req">*</span>
+          <input id="acc-private-key" placeholder="私钥" type="password" autocomplete="off" />
+        </label>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">保存账号</button>
+          <button type="button" class="btn btn-secondary" id="acc-form-cancel">取消编辑</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="/app.js"></script>
 </body>
 </html>
