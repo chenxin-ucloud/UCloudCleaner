@@ -423,7 +423,7 @@ function renderAccountTable() {
 async function deleteAccount(name) {
   if (!confirm(`确认删除账号「${name}」？`)) return;
   try {
-    await api(`/api/accounts/${encodeURIComponent(name)}`, { method: "DELETE" });
+    await api(`/api/accounts?name=${encodeURIComponent(name)}`, { method: "DELETE" });
     const wasSelected = state.selectedAccount === name;
     await loadAccounts();
     if (wasSelected) {

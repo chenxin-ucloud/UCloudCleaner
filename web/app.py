@@ -41,8 +41,11 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
             return _err("INVALID_PARAM", 400, str(e))
         return jsonify(account=acct)
 
-    @app.route("/api/accounts/<name>", methods=["DELETE"])
-    def remove_account(name):
+    @app.route("/api/accounts", methods=["DELETE"])
+    def remove_account():
+        name = (request.args.get("name") or "").strip()
+        if not name:
+            return _err("INVALID_PARAM", 400, "name 不能为空")
         if not accounts.delete_account(name):
             return _err("ACCOUNT_NOT_FOUND", 404)
         return jsonify(ok=True)
