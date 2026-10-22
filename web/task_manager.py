@@ -25,7 +25,9 @@ _REGION_DIR = os.path.join(
 def _load_regions_for_env(env_name: str) -> dict:
     filename = "region_test.json" if env_name == "测试环境" else "region.json"
     with open(os.path.join(_REGION_DIR, filename), "r", encoding="utf-8") as f:
-        return json.load(f)
+        data = json.load(f)
+    # 按名称（区域名）升序返回，保证前端与执行顺序一致
+    return dict(sorted(data.items()))
 
 
 def _redact_public_key(pk: str) -> str:

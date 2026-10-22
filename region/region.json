@@ -1,15 +1,115 @@
 {
-    "尼日利亚（拉各斯）可用区A(afr-nigeria-01)": {
-        "Region": "afr-nigeria",
-        "Zone": "afr-nigeria-01"
+    "MIYA-马来西亚（吉隆坡）可用区A(mas-miya-01)": {
+        "Region": "mas-miya",
+        "Zone": "mas-miya-01"
     },
-    "巴西（圣保罗）可用区A(bra-saopaulo-01)": {
-        "Region": "bra-saopaulo",
-        "Zone": "bra-saopaulo-01"
+    "上海三可用区A(cn-sh3-01)": {
+        "Region": "cn-sh3",
+        "Zone": "cn-sh3-01"
+    },
+    "上海五可用区A(cn-sh5-01)": {
+        "Region": "cn-sh5",
+        "Zone": "cn-sh5-01"
+    },
+    "上海四可用区A(cn-sh4-01)": {
+        "Region": "cn-sh4",
+        "Zone": "cn-sh4-01"
+    },
+    "乌兹别克斯坦（塔什干）可用区A(uz-tas-01)": {
+        "Region": "uz-tas",
+        "Zone": "uz-tas-01"
+    },
+    "俄罗斯（莫斯科）可用区A(rus-mosc-01)": {
+        "Region": "rus-mosc",
+        "Zone": "rus-mosc-01"
+    },
+    "俄罗斯（莫斯科）可用区B(rus-mosc-02)": {
+        "Region": "rus-mosc",
+        "Zone": "rus-mosc-02"
+    },
+    "华东（上海2）可用区A(cn-sh2-01)": {
+        "Region": "cn-sh2",
+        "Zone": "cn-sh2-01"
+    },
+    "华东（上海2）可用区B(cn-sh2-02)": {
+        "Region": "cn-sh2",
+        "Zone": "cn-sh2-02"
+    },
+    "华东（上海2）可用区C(cn-sh2-03)": {
+        "Region": "cn-sh2",
+        "Zone": "cn-sh2-03"
+    },
+    "华东（上海2）可用区D(cn-sh2-04)": {
+        "Region": "cn-sh2",
+        "Zone": "cn-sh2-04"
+    },
+    "华东（南京）可用区A(cn-js1-01)": {
+        "Region": "cn-js1",
+        "Zone": "cn-js1-01"
+    },
+    "华东（台州）可用区A(cn-zj2-01)": {
+        "Region": "cn-zj2",
+        "Zone": "cn-zj2-01"
     },
     "华东（合肥）可用区A(cn-ah1-01)": {
         "Region": "cn-ah1",
         "Zone": "cn-ah1-01"
+    },
+    "华东（嘉兴2）可用区A(cn-zj3-01)": {
+        "Region": "cn-zj3",
+        "Zone": "cn-zj3-01"
+    },
+    "华东（嘉兴）可用区A(cn-jx-01)": {
+        "Region": "cn-jx",
+        "Zone": "cn-jx-01"
+    },
+    "华东（宁波）可用区A(cn-ningbo-01)": {
+        "Region": "cn-ningbo",
+        "Zone": "cn-ningbo-01"
+    },
+    "华东（昆山）可用区A(cn-js2-01)": {
+        "Region": "cn-js2",
+        "Zone": "cn-js2-01"
+    },
+    "华东（杭州2）可用区A(cn-hangzhou2-01)": {
+        "Region": "cn-hangzhou2",
+        "Zone": "cn-hangzhou2-01"
+    },
+    "华东（济南）可用区A(cn-jinan-01)": {
+        "Region": "cn-jinan",
+        "Zone": "cn-jinan-01"
+    },
+    "华东（绍兴）可用区A(cn-zj4-01)": {
+        "Region": "cn-zj4",
+        "Zone": "cn-zj4-01"
+    },
+    "华东（苏州2）可用区A(cn-suzhou2-01)": {
+        "Region": "cn-suzhou2",
+        "Zone": "cn-suzhou2-01"
+    },
+    "华中（濮阳）可用区A(cn-hn1-01)": {
+        "Region": "cn-hn1",
+        "Zone": "cn-hn1-01"
+    },
+    "华中（长沙）可用区A(cn-changsha-01)": {
+        "Region": "cn-changsha",
+        "Zone": "cn-changsha-01"
+    },
+    "华北（乌兰察布2）可用区A(cn-wlcb2-01)": {
+        "Region": "cn-wlcb2",
+        "Zone": "cn-wlcb2-01"
+    },
+    "华北（乌兰察布3）可用区A(cn-wulanchabu3-01)": {
+        "Region": "cn-wulanchabu3",
+        "Zone": "cn-wulanchabu3-01"
+    },
+    "华北（乌兰察布）可用区A(cn-wlcb-01)": {
+        "Region": "cn-wlcb",
+        "Zone": "cn-wlcb-01"
+    },
+    "华北（乌兰察布）可用区C(cn-wlcb-03)": {
+        "Region": "cn-wlcb",
+        "Zone": "cn-wlcb-03"
     },
     "华北（北京2）可用区B(cn-bj2-02)": {
         "Region": "cn-bj2",
@@ -31,21 +131,17 @@
         "Region": "cn-bj3",
         "Zone": "cn-bj3-01"
     },
-    "华中（长沙）可用区A(cn-changsha-01)": {
-        "Region": "cn-changsha",
-        "Zone": "cn-changsha-01"
+    "华北（唐山）可用区A(cn-hb1-01)": {
+        "Region": "cn-hb1",
+        "Zone": "cn-hb1-01"
     },
-    "西南（成都）可用区A(cn-chengdu-01)": {
-        "Region": "cn-chengdu",
-        "Zone": "cn-chengdu-01"
+    "华北（天津）可用区A(cn-tianjin-01)": {
+        "Region": "cn-tianjin",
+        "Zone": "cn-tianjin-01"
     },
-    "西南（重庆）可用区A(cn-cq1-01)": {
-        "Region": "cn-cq1",
-        "Zone": "cn-cq1-01"
-    },
-    "华南（广州）可用区B(cn-gd-02)": {
-        "Region": "cn-gd",
-        "Zone": "cn-gd-02"
+    "华北（衡水）可用区A(cn-hb2-01)": {
+        "Region": "cn-hb2",
+        "Zone": "cn-hb2-01"
     },
     "华南（广州2）可用区A(cn-gd2-01)": {
         "Region": "cn-gd2",
@@ -55,33 +151,89 @@
         "Region": "cn-gd3",
         "Zone": "cn-gd3-01"
     },
-    "西南（贵阳）可用区A(cn-guiyang1-01)": {
-        "Region": "cn-guiyang1",
-        "Zone": "cn-guiyang1-01"
+    "华南（广州）可用区B(cn-gd-02)": {
+        "Region": "cn-gd",
+        "Zone": "cn-gd-02"
     },
-    "华东（杭州2）可用区A(cn-hangzhou2-01)": {
-        "Region": "cn-hangzhou2",
-        "Zone": "cn-hangzhou2-01"
+    "华南（泉州）可用区A(cn-qz-01)": {
+        "Region": "cn-qz",
+        "Zone": "cn-qz-01"
     },
-    "华北（唐山）可用区A(cn-hb1-01)": {
-        "Region": "cn-hb1",
-        "Zone": "cn-hb1-01"
+    "华南（深圳）可用区A(cn-shenzhen-01)": {
+        "Region": "cn-shenzhen",
+        "Zone": "cn-shenzhen-01"
     },
-    "华北（衡水）可用区A(cn-hb2-01)": {
-        "Region": "cn-hb2",
-        "Zone": "cn-hb2-01"
+    "印度尼西亚（雅加达）可用区A(idn-jakarta-01)": {
+        "Region": "idn-jakarta",
+        "Zone": "idn-jakarta-01"
     },
-    "香港2可用区A(cn-hk2-01)": {
-        "Region": "cn-hk2",
-        "Zone": "cn-hk2-01"
+    "印度（孟买）可用区A(ind-mumbai-01)": {
+        "Region": "ind-mumbai",
+        "Zone": "ind-mumbai-01"
     },
-    "华中（濮阳）可用区A(cn-hn1-01)": {
-        "Region": "cn-hn1",
-        "Zone": "cn-hn1-01"
+    "台湾台北二可用区A(tw-tp2-01)": {
+        "Region": "tw-tp2",
+        "Zone": "tw-tp2-01"
+    },
+    "台湾（台北）可用区A(tw-tp-01)": {
+        "Region": "tw-tp",
+        "Zone": "tw-tp-01"
+    },
+    "哈萨克斯坦（阿拉木图）可用区A(kz-ala-01)": {
+        "Region": "kz-ala",
+        "Zone": "kz-ala-01"
+    },
+    "墨西哥（克雷塔罗）可用区A(mx-qro-01)": {
+        "Region": "mx-qro",
+        "Zone": "mx-qro-01"
+    },
+    "墨西哥（墨西哥城）可用区A(mx-mex-01)": {
+        "Region": "mx-mex",
+        "Zone": "mx-mex-01"
+    },
+    "尼日利亚（拉各斯）可用区A(afr-nigeria-01)": {
+        "Region": "afr-nigeria",
+        "Zone": "afr-nigeria-01"
+    },
+    "巴基斯坦（卡拉奇）可用区A(pk-khi-01)": {
+        "Region": "pk-khi",
+        "Zone": "pk-khi-01"
+    },
+    "巴西（圣保罗）可用区A(bra-saopaulo-01)": {
+        "Region": "bra-saopaulo",
+        "Zone": "bra-saopaulo-01"
+    },
+    "德国（法兰克福）可用区A(ge-fra-01)": {
+        "Region": "ge-fra",
+        "Zone": "ge-fra-01"
+    },
+    "新加坡可用区A(sg-01)": {
+        "Region": "sg",
+        "Zone": "sg-01"
+    },
+    "新加坡可用区B(sg-02)": {
+        "Region": "sg",
+        "Zone": "sg-02"
+    },
+    "日本（东京）可用区A(jpn-tky-01)": {
+        "Region": "jpn-tky",
+        "Zone": "jpn-tky-01"
     },
     "杭州可用区A(cn-hz-01)": {
         "Region": "cn-hz",
         "Zone": "cn-hz-01"
+    },
+    "格林深瞳新疆可用区A(cn-xj-01)": {
+        "Region": "cn-xj",
+        "Zone": "cn-xj-01"
+    },
+    "泰国（曼谷）可用区A(th-bkk-01)": {
+        "Region": "th-bkk",
+        "Zone": "th-bkk-01"
+    },
+    "泰国（曼谷）可用区B(th-bkk-02)": {
+        "Region": "th-bkk",
+        "Zone": "th-bkk-02"
     },
     "浪潮华北一可用区A(cn-inspur-01)": {
         "Region": "cn-inspur",
@@ -91,33 +243,49 @@
         "Region": "cn-inspur2",
         "Zone": "cn-inspur2-01"
     },
-    "华东（济南）可用区A(cn-jinan-01)": {
-        "Region": "cn-jinan",
-        "Zone": "cn-jinan-01"
+    "美国（丹佛）可用区A(us-den-01)": {
+        "Region": "us-den",
+        "Zone": "us-den-01"
     },
-    "华东（南京）可用区A(cn-js1-01)": {
-        "Region": "cn-js1",
-        "Zone": "cn-js1-01"
+    "美国（华盛顿）可用区A(us-ws-01)": {
+        "Region": "us-ws",
+        "Zone": "us-ws-01"
     },
-    "华东（昆山）可用区A(cn-js2-01)": {
-        "Region": "cn-js2",
-        "Zone": "cn-js2-01"
+    "美国（洛杉矶）可用区A(us-ca-01)": {
+        "Region": "us-ca",
+        "Zone": "us-ca-01"
     },
-    "华东（嘉兴）可用区A(cn-jx-01)": {
-        "Region": "cn-jx",
-        "Zone": "cn-jx-01"
+    "英国（伦敦）可用区A(uk-london-01)": {
+        "Region": "uk-london",
+        "Zone": "uk-london-01"
     },
-    "华东（宁波）可用区A(cn-ningbo-01)": {
-        "Region": "cn-ningbo",
-        "Zone": "cn-ningbo-01"
+    "菲律宾（马尼拉）可用区A(ph-mnl-01)": {
+        "Region": "ph-mnl",
+        "Zone": "ph-mnl-01"
     },
-    "华南（泉州）可用区A(cn-qz-01)": {
-        "Region": "cn-qz",
-        "Zone": "cn-qz-01"
+    "西北（西安）可用区A(cn-xian1-01)": {
+        "Region": "cn-xian1",
+        "Zone": "cn-xian1-01"
+    },
+    "西南（成都）可用区A(cn-chengdu-01)": {
+        "Region": "cn-chengdu",
+        "Zone": "cn-chengdu-01"
+    },
+    "西南（贵阳）可用区A(cn-guiyang1-01)": {
+        "Region": "cn-guiyang1",
+        "Zone": "cn-guiyang1-01"
+    },
+    "西南（重庆）可用区A(cn-cq1-01)": {
+        "Region": "cn-cq1",
+        "Zone": "cn-cq1-01"
     },
     "西南（雅安）可用区A(cn-sc1-01)": {
         "Region": "cn-sc1",
         "Zone": "cn-sc1-01"
+    },
+    "越南（胡志明）可用区A(vn-sng-01)": {
+        "Region": "vn-sng",
+        "Zone": "vn-sng-01"
     },
     "金融云-华东（上海）可用区A(cn-sh-01)": {
         "Region": "cn-sh",
@@ -131,85 +299,17 @@
         "Region": "cn-sh",
         "Zone": "cn-sh-03"
     },
-    "华东（上海2）可用区A(cn-sh2-01)": {
-        "Region": "cn-sh2",
-        "Zone": "cn-sh2-01"
+    "阿联酋（迪拜）可用区A(uae-dubai-01)": {
+        "Region": "uae-dubai",
+        "Zone": "uae-dubai-01"
     },
-    "华东（上海2）可用区B(cn-sh2-02)": {
-        "Region": "cn-sh2",
-        "Zone": "cn-sh2-02"
+    "韩国（首尔）可用区A(kr-seoul-01)": {
+        "Region": "kr-seoul",
+        "Zone": "kr-seoul-01"
     },
-    "华东（上海2）可用区C(cn-sh2-03)": {
-        "Region": "cn-sh2",
-        "Zone": "cn-sh2-03"
-    },
-    "华东（上海2）可用区D(cn-sh2-04)": {
-        "Region": "cn-sh2",
-        "Zone": "cn-sh2-04"
-    },
-    "上海三可用区A(cn-sh3-01)": {
-        "Region": "cn-sh3",
-        "Zone": "cn-sh3-01"
-    },
-    "上海四可用区A(cn-sh4-01)": {
-        "Region": "cn-sh4",
-        "Zone": "cn-sh4-01"
-    },
-    "上海五可用区A(cn-sh5-01)": {
-        "Region": "cn-sh5",
-        "Zone": "cn-sh5-01"
-    },
-    "华南（深圳）可用区A(cn-shenzhen-01)": {
-        "Region": "cn-shenzhen",
-        "Zone": "cn-shenzhen-01"
-    },
-    "华东（苏州2）可用区A(cn-suzhou2-01)": {
-        "Region": "cn-suzhou2",
-        "Zone": "cn-suzhou2-01"
-    },
-    "华北（天津）可用区A(cn-tianjin-01)": {
-        "Region": "cn-tianjin",
-        "Zone": "cn-tianjin-01"
-    },
-    "华北（乌兰察布）可用区A(cn-wlcb-01)": {
-        "Region": "cn-wlcb",
-        "Zone": "cn-wlcb-01"
-    },
-    "华北（乌兰察布）可用区C(cn-wlcb-03)": {
-        "Region": "cn-wlcb",
-        "Zone": "cn-wlcb-03"
-    },
-    "华北（乌兰察布2）可用区A(cn-wlcb2-01)": {
-        "Region": "cn-wlcb2",
-        "Zone": "cn-wlcb2-01"
-    },
-    "华北（乌兰察布3）可用区A(cn-wulanchabu3-01)": {
-        "Region": "cn-wulanchabu3",
-        "Zone": "cn-wulanchabu3-01"
-    },
-    "西北（西安）可用区A(cn-xian1-01)": {
-        "Region": "cn-xian1",
-        "Zone": "cn-xian1-01"
-    },
-    "格林深瞳新疆可用区A(cn-xj-01)": {
-        "Region": "cn-xj",
-        "Zone": "cn-xj-01"
-    },
-    "华东（台州）可用区A(cn-zj2-01)": {
-        "Region": "cn-zj2",
-        "Zone": "cn-zj2-01"
-    },
-    "华东（嘉兴2）可用区A(cn-zj3-01)": {
-        "Region": "cn-zj3",
-        "Zone": "cn-zj3-01"
-    },
-    "华东（绍兴）可用区A(cn-zj4-01)": {
-        "Region": "cn-zj4",
-        "Zone": "cn-zj4-01"
-    },
-    "德国（法兰克福）可用区A(ge-fra-01)": {
-        "Region": "ge-fra",
-        "Zone": "ge-fra-01"
+    "香港2可用区A(cn-hk2-01)": {
+        "Region": "cn-hk2",
+        "Zone": "cn-hk2-01"
     },
     "香港可用区A(hk-01)": {
         "Region": "hk",
@@ -223,108 +323,8 @@
         "Region": "hk",
         "Zone": "hk-03"
     },
-    "印度尼西亚（雅加达）可用区A(idn-jakarta-01)": {
-        "Region": "idn-jakarta",
-        "Zone": "idn-jakarta-01"
-    },
-    "印度（孟买）可用区A(ind-mumbai-01)": {
-        "Region": "ind-mumbai",
-        "Zone": "ind-mumbai-01"
-    },
-    "日本（东京）可用区A(jpn-tky-01)": {
-        "Region": "jpn-tky",
-        "Zone": "jpn-tky-01"
-    },
-    "韩国（首尔）可用区A(kr-seoul-01)": {
-        "Region": "kr-seoul",
-        "Zone": "kr-seoul-01"
-    },
-    "哈萨克斯坦（阿拉木图）可用区A(kz-ala-01)": {
-        "Region": "kz-ala",
-        "Zone": "kz-ala-01"
-    },
     "马来西亚（柔佛）可用区A(mas-jh-01)": {
         "Region": "mas-jh",
         "Zone": "mas-jh-01"
-    },
-    "MIYA-马来西亚（吉隆坡）可用区A(mas-miya-01)": {
-        "Region": "mas-miya",
-        "Zone": "mas-miya-01"
-    },
-    "墨西哥（墨西哥城）可用区A(mx-mex-01)": {
-        "Region": "mx-mex",
-        "Zone": "mx-mex-01"
-    },
-    "墨西哥（克雷塔罗）可用区A(mx-qro-01)": {
-        "Region": "mx-qro",
-        "Zone": "mx-qro-01"
-    },
-    "菲律宾（马尼拉）可用区A(ph-mnl-01)": {
-        "Region": "ph-mnl",
-        "Zone": "ph-mnl-01"
-    },
-    "巴基斯坦（卡拉奇）可用区A(pk-khi-01)": {
-        "Region": "pk-khi",
-        "Zone": "pk-khi-01"
-    },
-    "俄罗斯（莫斯科）可用区A(rus-mosc-01)": {
-        "Region": "rus-mosc",
-        "Zone": "rus-mosc-01"
-    },
-    "俄罗斯（莫斯科）可用区B(rus-mosc-02)": {
-        "Region": "rus-mosc",
-        "Zone": "rus-mosc-02"
-    },
-    "新加坡可用区A(sg-01)": {
-        "Region": "sg",
-        "Zone": "sg-01"
-    },
-    "新加坡可用区B(sg-02)": {
-        "Region": "sg",
-        "Zone": "sg-02"
-    },
-    "泰国（曼谷）可用区A(th-bkk-01)": {
-        "Region": "th-bkk",
-        "Zone": "th-bkk-01"
-    },
-    "泰国（曼谷）可用区B(th-bkk-02)": {
-        "Region": "th-bkk",
-        "Zone": "th-bkk-02"
-    },
-    "台湾（台北）可用区A(tw-tp-01)": {
-        "Region": "tw-tp",
-        "Zone": "tw-tp-01"
-    },
-    "台湾台北二可用区A(tw-tp2-01)": {
-        "Region": "tw-tp2",
-        "Zone": "tw-tp2-01"
-    },
-    "阿联酋（迪拜）可用区A(uae-dubai-01)": {
-        "Region": "uae-dubai",
-        "Zone": "uae-dubai-01"
-    },
-    "英国（伦敦）可用区A(uk-london-01)": {
-        "Region": "uk-london",
-        "Zone": "uk-london-01"
-    },
-    "美国（洛杉矶）可用区A(us-ca-01)": {
-        "Region": "us-ca",
-        "Zone": "us-ca-01"
-    },
-    "美国（丹佛）可用区A(us-den-01)": {
-        "Region": "us-den",
-        "Zone": "us-den-01"
-    },
-    "美国（华盛顿）可用区A(us-ws-01)": {
-        "Region": "us-ws",
-        "Zone": "us-ws-01"
-    },
-    "乌兹别克斯坦（塔什干）可用区A(uz-tas-01)": {
-        "Region": "uz-tas",
-        "Zone": "uz-tas-01"
-    },
-    "越南（胡志明）可用区A(vn-sng-01)": {
-        "Region": "vn-sng",
-        "Zone": "vn-sng-01"
     }
 }
