@@ -8,7 +8,6 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from sdk.delete_all_resources import fetch_region_list
 from sdk.runner_core import run_deletion_core
 from web.log_handler import BufferHandler
 
@@ -23,12 +22,10 @@ _REGION_DIR = os.path.join(
 )
 
 
-def _load_regions_for_env(env_name: str, public_key=None, private_key=None, base_url=None) -> dict:
-    if env_name == "测试环境":
-        with open(os.path.join(_REGION_DIR, "region_test.json"), "r", encoding="utf-8") as f:
-            return json.load(f)
-    # 正式环境：通过 SDK GetRegion 动态获取（无需 region.json）
-    return fetch_region_list(public_key, private_key, base_url=base_url or None)
+def _load_regions_for_env(env_name: str) -> dict:
+    filename = "region_test.json" if env_name == "测试环境" else "region.json"
+    with open(os.path.join(_REGION_DIR, filename), "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def _redact_public_key(pk: str) -> str:
@@ -131,9 +128,7 @@ class TaskManager:
             bridge = BufferHandler(task)
             sdk_logger.addHandler(bridge)
             try:
-                regions = _load_regions_for_env(
-                    task.env_name, task.public_key, task.private_key, task.api_url
-                )
+                regions = _load_regions_for_env(task.env_name)
                 run_deletion_core(
                     regions=regions,
                     project_ids=task.project_ids,

@@ -112,39 +112,6 @@ def fetch_project_list(public_key, private_key, base_url=None):
         return []
 
 
-def fetch_region_list(public_key, private_key, base_url=None):
-    """获取正式环境地域列表（通过 GetRegion API），返回与 region.json 同格式的 dict。
-
-    供 Web 在选定正式环境账号后自动拉取地域；调用失败时返回空 dict 并记录 ERROR 日志。
-
-    返回格式: {"区域名": {"Region": "...", "Zone": "..."}, ...}
-    """
-    config = {
-        "public_key": public_key,
-        "private_key": private_key,
-    }
-    if base_url:
-        config["base_url"] = base_url
-    try:
-        client = Client(config)
-        resp = client.uaccount().get_region()
-        regions = resp.get("Regions", [])
-        result = {}
-        for r in regions:
-            name = r.get("RegionName")
-            region = r.get("Region")
-            if not name or not region:
-                continue
-            # 同一区域可能返回多条（多可用区），首个优先，保持与 region.json 单可用区一致
-            if name in result:
-                continue
-            result[name] = {"Region": region, "Zone": r.get("Zone") or ""}
-        return result
-    except Exception as e:
-        logger.error(f"获取正式环境地域列表失败: {e}")
-        return {}
-
-
 def _interruptible_sleep(seconds, stop_event=None):
     """分段 sleep，每 0.5 秒检查一次停止信号；stop_event 为 None 时退化为普通 sleep"""
     if stop_event is None:

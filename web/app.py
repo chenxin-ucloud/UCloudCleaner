@@ -57,9 +57,7 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
             return _err("ACCOUNT_NOT_FOUND", 404)
         env_name = resolve_env_name(acct["base_url"])
         try:
-            regions = _load_regions_for_env(
-                env_name, acct["public_key"], acct["private_key"], acct["base_url"] or None
-            )
+            regions = _load_regions_for_env(env_name)
             return jsonify(regions)
         except FileNotFoundError as e:
             return _err("INTERNAL", 500, str(e))
@@ -115,9 +113,7 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
         # 区域必须是该账号对应环境下的合法 key
         env_name = resolve_env_name(acct["base_url"])
         try:
-            valid_regions = set(_load_regions_for_env(
-                env_name, acct["public_key"], acct["private_key"], acct["base_url"] or None
-            ).keys())
+            valid_regions = set(_load_regions_for_env(env_name).keys())
         except FileNotFoundError as e:
             return f"区域文件加载失败: {e}"
         invalid_r = set(regions) - valid_regions

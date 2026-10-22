@@ -15,3 +15,5 @@
 pytest.ini
 tests/
 .pytest_cache
+region/zone-pre.json
+region/zone-prod.json
