@@ -416,7 +416,7 @@ function renderAccountTable() {
     const idTd = document.createElement("td");
     idTd.className = "account-id";
     idTd.title = a.id;
-    idTd.textContent = a.id.slice(0, 8) + "...";
+    idTd.textContent = a.id.slice(0, 4) + "...";
 
     const nameTd = document.createElement("td");
     nameTd.textContent = a.name;
