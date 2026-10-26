@@ -81,7 +81,7 @@ UHost → UDisk → NATGW → UNI → ALB → NLB → EIP → UGN → UWAN → S
 
 ### 4. 安全说明
 
-- **账号凭证保存在本地**：公私钥持久化到 `web/accounts.json`（已加入 `.gitignore`，不会提交到版本库），仅本机使用
+- **账号凭证保存在本地**：公私钥持久化到用户数据目录 `~/Library/Application Support/UCloudCleaner/accounts.json`（Windows `%APPDATA%\UCloudCleaner`，Linux `~/.config/UCloudCleaner`），仅本机使用
 - **私钥不写入浏览器**：不写入浏览器 localStorage；任务执行期间的内存副本在任务结束后立即擦除
 - **API 响应脱敏**：接口返回中不包含 `private_key`，`public_key` 仅显示前 4 位
 - **默认仅本机访问**：服务监听 `127.0.0.1`，除非手动修改 `web/config.json` 中的 `host`
