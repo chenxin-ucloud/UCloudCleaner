@@ -112,6 +112,25 @@ def fetch_project_list(public_key, private_key, base_url=None):
         return []
 
 
+def validate_credentials(public_key, private_key, base_url=None):
+    """校验公私钥是否有效（以能否成功调用 GetProjectList 为准）。
+
+    返回 (ok, message)；ok 为 True 表示公私钥有效。零项目但密钥有效也返回 True。
+    """
+    config = {
+        "public_key": public_key,
+        "private_key": private_key,
+    }
+    if base_url:
+        config["base_url"] = base_url
+    try:
+        client = Client(config)
+        client.uaccount().get_project_list()
+        return True, ""
+    except Exception as e:
+        return False, str(e)
+
+
 def _interruptible_sleep(seconds, stop_event=None):
     """分段 sleep，每 0.5 秒检查一次停止信号；stop_event 为 None 时退化为普通 sleep"""
     if stop_event is None:

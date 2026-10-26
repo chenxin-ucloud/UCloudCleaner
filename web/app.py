@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 
-from sdk.delete_all_resources import DELETE_OPERATIONS, fetch_project_list
+from sdk.delete_all_resources import DELETE_OPERATIONS, fetch_project_list, validate_credentials
 from sdk.runner_core import resolve_env_name
 from web import accounts
 from web.sse import stream_events
@@ -35,6 +35,14 @@ def create_app(testing: bool = False) -> Tuple[Flask, TaskManager]:
     @app.route("/api/accounts", methods=["POST"])
     def save_account():
         payload = request.get_json(silent=True) or {}
+        public_key = (payload.get("public_key") or "").strip()
+        private_key = (payload.get("private_key") or "").strip()
+        base_url = (payload.get("base_url") or "").strip()
+        # 必填项齐全时，先校验公私钥能否获取项目
+        if public_key and private_key and base_url:
+            ok, msg = validate_credentials(public_key, private_key, base_url or None)
+            if not ok:
+                return _err("INVALID_CREDENTIALS", 400, f"公私钥校验失败: {msg}")
         try:
             acct = accounts.upsert_account(payload)
         except ValueError as e:

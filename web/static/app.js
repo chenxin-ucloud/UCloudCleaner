@@ -18,6 +18,8 @@ const state = {
   selectedAccountIds: new Set(),  // 批量选择的账号 ID
 };
 
+let projectsFetchSeq = 0;  // 项目请求序号，防竞态
+
 const $ = (sel) => document.querySelector(sel);
 
 function escapeHtml(s) {
@@ -119,13 +121,16 @@ async function fetchProjects() {
     msg.textContent = "请先选择账号";
     return;
   }
+  const seq = ++projectsFetchSeq;
+  const accountId = state.selectedAccount;
   msg.textContent = "加载中...";
   try {
     const body = await api("/api/projects", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ account_id: state.selectedAccount }),
+      body: JSON.stringify({ account_id: accountId }),
     });
+    if (seq !== projectsFetchSeq) return; // 账号已切换，丢弃过期响应
     state.projects = body.projects || [];
     // 自动保留之前已选且仍存在的项目
     const valid = new Set();
@@ -138,6 +143,7 @@ async function fetchProjects() {
       ? `已加载 ${state.projects.length} 个项目`
       : "未获取到项目（请检查账号密钥）";
   } catch (e) {
+    if (seq !== projectsFetchSeq) return;
     msg.textContent = e.message;
   }
 }
@@ -646,6 +652,7 @@ function bindForm() {
     $("#projects-msg").textContent = "";
     saveConfig();
     await loadRegions();
+    if (state.selectedAccount) fetchProjects();
   });
 
   $("#manage-accounts").addEventListener("click", openAccountModal);
@@ -678,6 +685,8 @@ function bindForm() {
 
     const editingId = state.editingAccount;
     const affectsSelection = editingId == null || editingId === state.selectedAccount;
+    const submitBtn = e.submitter;
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "校验中..."; }
     try {
       const body = { ...payload };
       if (editingId != null) body.id = editingId;
@@ -702,6 +711,8 @@ function bindForm() {
       showToast("账号已保存");
     } catch (err) {
       showToast(err.message, "error");
+    } finally {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "保存账号"; }
     }
   });
 
@@ -717,9 +728,11 @@ function bindForm() {
 async function onSubmit() {
   const err = $("#submit-error"); err.textContent = "";
   if (!state.selectedAccount) return err.textContent = "请选择账号";
+  // 只提交当前项目列表中真实存在的项目，避免刷新后残留的勾选误导删除
+  const validProjectIds = new Set(state.projects.map((p) => p.project_id));
   const payload = {
     account_id: state.selectedAccount,
-    project_ids: [...state.selectedProjects],
+    project_ids: [...state.selectedProjects].filter((id) => validProjectIds.has(id)),
     selected_regions: [...state.selectedRegions],
     selected_resources: [...state.selectedResources],
   };
@@ -747,6 +760,7 @@ async function main() {
   await loadAccounts();
   await Promise.all([loadResources(), loadSnapshot()]);
   await loadRegions();
+  if (state.selectedAccount) fetchProjects();
   if (state.tasks.running) ensureSubscribed(state.tasks.running.task_id);
 }
 
